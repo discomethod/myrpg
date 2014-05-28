@@ -7,6 +7,7 @@ CHARACTER_ATTRIBUTES = ("Strength","Dexterity","Intelligence","Charisma","Vitali
 
 class Character(models.Model):
     for attribute in CHARACTER_ATTRIBUTES:
+        character_attribute = dict()
         character_attribute[attribute] = models.IntegerField(default=1)
 
 class ItemSlot(models.Model):
