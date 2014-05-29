@@ -96,9 +96,9 @@ class Modifier(models.Model):
             else:
                 discription += "-"
             description += str(abs(self.percentage)) + "%"
-            if self.dependency=='None':
+            if self.get_dependency_display()!='None':
                 description += " some dependency"
-        description += " " + self.modifiable
+        description += " " + self.get_modifiable_display()
         return description
     
 # Advanced models
