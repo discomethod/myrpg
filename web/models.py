@@ -56,7 +56,7 @@ class ItemType(models.Model):
 class Modifier(models.Model):
     # choice of attribute
     ATTRIBUTES = ['Strength', 'Dexterity', 'Intelligence', 'Vitality', 'Charisma', 'Wisdom', ]
-    ELEMENTS = ['Physical', 'Spell', 'Shadow', 'Arcane', 'Lightning', 'Poison', 'Fire', 'Ice', 'Psychic', 'Chaos', ]
+    ELEMENTS = ['Physical Damage', 'Spell Damage', 'Shadow Damage', 'Arcane Damage', 'Lightning Damage', 'Poison Damage', 'Fire Damage', 'Ice Damage', 'Psychic Damage', 'Chaos Damage', ]
     MODIFIABLE_CHOICES = []
     MODIFIABLES = ATTRIBUTES + ELEMENTS
     for MODIFIABLE in MODIFIABLES:
@@ -78,6 +78,30 @@ class Modifier(models.Model):
     total_max = models.IntegerField(default=0)
     bound_lower = models.BooleanField(default=False)
     bound_upper = models.BooleanField(default=False)
+    
+    def __unicode__( self ):
+        # cook up string representation of this modifier
+        description = ""
+        if self.flat_min != 0 or self.flat_max != 0:
+            # there is a flat modifier
+            if self.flat_min >= 0:
+                descirption += "+ "
+            if self.flat_min != self.flat_max:
+                description += str(self.flat_min) + " to " + str(self.flat_max)
+            else:
+                description += str(self.flat_min)
+        if self.percentage != 0:
+            if description != "":
+                description += ", "
+            if self.percentage > 0:
+                description += "+"
+            else:
+                discription += "-"
+            description += str(abs(self.percentage)) + "%"
+            if self.dependency.get_dependency_display()=='None':
+                description += " some dependency"
+        description += " " + self.modifiable.get_modifiable_display()
+        return description
     
 # Advanced models
     
