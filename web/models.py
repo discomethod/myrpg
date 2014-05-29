@@ -85,9 +85,9 @@ class Modifier(models.Model):
         if self.flat_min != 0 or self.flat_max != 0:
             # there is a flat modifier
             if self.flat_min != self.flat_max:
-                description += str(("+" if self.flat_min>=0 else "-") + abs(self.flat_min)) + " to " + str(("+" if self.flat_max>=0 else "-") + abs(self.flat_max))
+                description += ("+" if self.flat_min>=0 else "-") + str(abs(self.flat_min)) + " to " + ("+" if self.flat_max>=0 else "-") + str(abs(self.flat_max))
             else:
-                description += str(("+" if self.flat_min>=0 else "-") + abs(self.flat_min))
+                description += ("+" if self.flat_min>=0 else "-") + str(abs(self.flat_min))
         if self.percentage != 0:
             if description != "":
                 description += ", "
