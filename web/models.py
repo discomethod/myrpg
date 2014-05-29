@@ -101,7 +101,7 @@ class Modifier(models.Model):
             elif self.get_dependency_display()=='ItemLevel':
                 description += " of your item level"
             elif self.get_dependency_display()=='None':
-                if self.percentage > 0 and 
+                if self.percentage > 0:
                     description += " increased"
                 else:
                     discription += " decreased"
