@@ -34,6 +34,8 @@ SLOTS:
 """
 class ItemSlot(models.Model):
     name = models.CharField(max_length=64)
+    def __unicode__( self ):
+        return self.name
 
 """
 ITEM TYPES:
@@ -50,6 +52,8 @@ ITEM TYPES:
 """
 class ItemType(models.Model):
     name = models.CharField(max_length=64)
+    def __unicode__( self ):
+        return self.name
 
 # Core models
 
