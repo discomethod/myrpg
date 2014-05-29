@@ -55,8 +55,8 @@ class ItemType(models.Model):
 
 class Modifier(models.Model):
     # choice of attribute
-    ATTRIBUTES = {'Strength', 'Dexterity', 'Intelligence', 'Vitality', 'Charisma', 'Wisdom', }
-    ELEMENTS = {'Physical', 'Spell', 'Shadow', 'Arcane', 'Lightning', 'Poison', 'Fire', 'Ice', 'Psychic', 'Chaos', }
+    ATTRIBUTES = ['Strength', 'Dexterity', 'Intelligence', 'Vitality', 'Charisma', 'Wisdom', ]
+    ELEMENTS = ['Physical', 'Spell', 'Shadow', 'Arcane', 'Lightning', 'Poison', 'Fire', 'Ice', 'Psychic', 'Chaos', ]
     MODIFIABLE_CHOICES = []
     MODIFIABLES = ATTRIBUTES + ELEMENTS
     for MODIFIABLE in MODIFIABLES:
@@ -64,7 +64,7 @@ class Modifier(models.Model):
     modifiable = models.CharField(max_length=3, choices=MODIFIABLE_CHOICES, default=MODIFIABLE_CHOICES[0][0])
     
     # choice of dependency
-    DEPENDENCIES = {'None', 'CharacterLevel', 'SkillLevel','ItemLevel',}
+    DEPENDENCIES = ['None', 'CharacterLevel', 'SkillLevel','ItemLevel',]
     DEPENDENCY_CHOICES = []
     for DEPENDENCY in DEPENDENCIES:
         DEPENDENCY_CHOICES.append((DEPENDENCY[:3].upper(),DEPENDENCY))
