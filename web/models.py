@@ -91,6 +91,8 @@ class Modifier(models.Model):
         if self.percentage != 0:
             if description != "":
                 description += ", "
+            if self.get_dependency_display()!='None':
+                description += "+"
             description += str(abs(self.percentage)) + "%"
             if self.get_dependency_display()=='CharacterLevel':
                 description += " of your level"
@@ -98,10 +100,11 @@ class Modifier(models.Model):
                 description += " of your skill level"
             elif self.get_dependency_display()=='ItemLevel':
                 description += " of your item level"
-            if self.percentage > 0:
-                description += " increased"
-            else:
-                discription += " decreased"
+            elif self.get_dependency_display()=='None':
+                if self.percentage > 0 and 
+                    description += " increased"
+                else:
+                    discription += " decreased"
         description += " " + self.get_modifiable_display().lower()
         return description
     
