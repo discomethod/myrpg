@@ -113,7 +113,7 @@ class Modifier(models.Model):
         return description
     
 # Advanced models
-    
+
 class Character(models.Model):
     # character name
     name = models.CharField(max_length=64)
@@ -124,10 +124,21 @@ class Character(models.Model):
     
     modification = models.ManyToManyField(Modifier)
     
-    
+class ItemPrefixGroup(models.Model):
+    name = models.CharField(max_length=64)
+    def __unicode__( self ):
+        return self.name
+
+class ItemSuffixGroup(models.Model):
+    name = models.CharField(max_length=64)
+    def __unicode__( self ):
+        return self.name
+
 class ItemPrefix(models.Model):
     name = models.CharField(max_length=64)
     modification = models.ManyToManyField(Modifier, blank=True)
+    ilevel = models.IntegerField(default=0)
+    group = models.ForeignKey('ItemPrefixGroup')
     def __unicode__( self ):
         return self.name
     def get_modifications_display(self):
@@ -140,6 +151,8 @@ class ItemPrefix(models.Model):
 class ItemSuffix(models.Model):
     name = models.CharField(max_length=64)
     modification = models.ManyToManyField(Modifier, blank=True)
+    ilevel = models.IntegerField(default=0)
+    group = models.ForeignKey('ItemSuffixGroup')
     def __unicode__( self ):
         return self.name
     
