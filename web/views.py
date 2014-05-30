@@ -8,6 +8,11 @@ from web.models import Item
 def index(request):
     return HttpResponse("Hello, world. You're at the web index.")
 
+def itemgen(request):
+    item_list = Item.objects.filter(base__isnull=True).order_by('name')
+    context = {'item_list': item_list}
+    return render(request, 'web/itemgen.html', context)
+
 def itemlist(request):
     item_list = Item.objects.order_by('name')
     context = {'item_list': item_list}

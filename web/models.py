@@ -52,7 +52,13 @@ ITEM TYPES:
 """
 class ItemType(models.Model):
     name = models.CharField(max_length=64)
+    rarenames = models.ManyToManyField('ItemTypeRare', blank=True)
     def __unicode__( self ):
+        return self.name
+
+class ItemTypeRare(models.Model):
+    name = models.CharField(max_length=64)
+    def __unicode__(self):
         return self.name
 
 # Core models

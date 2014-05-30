@@ -23,7 +23,7 @@
      {% endfor %}
    {% endfor %}
    {% for suffix in item.suffixes.all %}
-     <br /><strong>{{ suffix }}</strong> prefix:
+     <br /><strong>{{ suffix }}</strong> suffix:
      {% for modification in suffix.modifications.all %}
        <br />{{ modification }}
      {% endfor %}

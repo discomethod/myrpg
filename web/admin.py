@@ -1,5 +1,5 @@
 from django.contrib import admin
-from web.models import Modifier, Item, ItemPrefix, ItemSuffix, ItemType, ItemSlot, ItemPrefixGroup, ItemSuffixGroup
+from web.models import Modifier, Item, ItemPrefix, ItemSuffix, ItemType, ItemSlot, ItemPrefixGroup, ItemSuffixGroup, ItemTypeRare
 
 class ItemPrefixAdmin(admin.ModelAdmin):
     list_display = ('name','get_modifications_display','group')
@@ -11,6 +11,7 @@ class ItemAdmin(admin.ModelAdmin):
 admin.site.register(Modifier)
 admin.site.register(Item, ItemAdmin)
 admin.site.register(ItemType)
+admin.site.register(ItemTypeRare)
 admin.site.register(ItemSlot)
 admin.site.register(ItemPrefix, ItemPrefixAdmin)
 admin.site.register(ItemSuffix)
