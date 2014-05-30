@@ -130,6 +130,12 @@ class ItemPrefix(models.Model):
     modification = models.ManyToManyField(Modifier, blank=True)
     def __unicode__( self ):
         return self.name
+    def get_modifications_display(self):
+        result = ""
+        for modification in self.modification.all():
+            result += str(modification) + ", "
+        result = result[:-2]
+        return result
 
 class ItemSuffix(models.Model):
     name = models.CharField(max_length=64)
@@ -147,3 +153,4 @@ class Item(models.Model):
     modification = models.ManyToManyField(Modifier, blank=True) # an item can have no modifications
     def __unicode__( self ):
         return self.name
+
