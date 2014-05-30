@@ -167,4 +167,8 @@ class Item(models.Model):
     modification = models.ManyToManyField(Modifier, blank=True) # an item can have no modifications
     def __unicode__( self ):
         return self.name
-
+    def is_base(self):
+        return not self.base
+    is_base.admin_order_field = 'base'
+    is_base.boolean = True
+    is_base.short_description = 'Base Item'

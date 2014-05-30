@@ -4,8 +4,12 @@ from web.models import Modifier, Item, ItemPrefix, ItemSuffix, ItemType, ItemSlo
 class ItemPrefixAdmin(admin.ModelAdmin):
     list_display = ('name','get_modifications_display','group')
 
+class ItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_base','base')
+    list_filter = ['base']
+
 admin.site.register(Modifier)
-admin.site.register(Item)
+admin.site.register(Item, ItemAdmin)
 admin.site.register(ItemType)
 admin.site.register(ItemSlot)
 admin.site.register(ItemPrefix, ItemPrefixAdmin)
