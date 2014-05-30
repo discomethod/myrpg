@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}
+Generate Items
+{% endblock %}
+
+{% block content %}
+{% if item_list %}
+    <form role="form">
+      <div class="form-group">
+        <label for="baseItem">Base Item</label>
+        <select class="form-control" id="baseItem">
+        {% for item in item_list %}
+          <option>{{ item }}</option>
+        {% endfor %}
+        </select>
+      </div>
+    </form>
+{% else %}
+    <p>No items to see here.</p>
+{% endif %}
+{% endblock %}
