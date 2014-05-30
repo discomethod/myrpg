@@ -7,16 +7,40 @@ Generate Items
 {% block content %}
 {% if item_list %}
     <form role="form">
-      <div class="form-group">
-        <label for="baseItem">Base Item</label>
-        <select class="form-control" id="baseItem">
-        {% for item in item_list %}
-          <option>{{ item }}</option>
-        {% endfor %}
-        </select>
-      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="baseItem">Base Item</label>
+            <select class="form-control" id="baseItem">
+            {% for item in item_list %}
+              <option>{{ item }}</option>
+            {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="prefixes">Prefixes</label>
+            <select multiple class="form-control" id="prefixes">
+            {% for prefix in prefix_list %}
+              <option>{{ prefix }}</option>
+            {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="suffixes">Suffixes</label>
+            <select multiple class="form-control" id="suffixes">
+            {% for suffix in suffix_list %}
+              <option>{{ suffix }}</option>
+            {% endfor %}
+            </select>
+          </div>
+            
+        </div>
     </form>
 {% else %}
-    <p>No items to see here.</p>
+    <p>Nothing to see here.</p>
 {% endif %}
 {% endblock %}
