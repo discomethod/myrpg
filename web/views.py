@@ -1,4 +1,4 @@
-from copy import copy
+from copy import copy, deepcopy
 from random import randrange
 
 from django.db.models import Count
@@ -73,7 +73,7 @@ def itemgen(request):
                                 # add all suffixes in suffixgroup_set
                                 
                                 # shallow copy the base item
-                                new_item = copy(base_item)
+                                new_item = deepcopy(base_item)
                                 # erase the primary key
                                 new_item.pk = None
                                 # add base relation
@@ -100,8 +100,7 @@ def itemgen(request):
                                 if len(prefix_list) + len(suffix_list) < 1:
                                     continue
                                 # check if the item we are about to create already exists
-                                temp = Item.objects.filter(base=base_item).annotate(num_prefixes=Count('prefixes'),num_suffixes=Count('suffixes'))
-                                temp = temp.filter(num_prefixes=len(prefix_list)).filter(num_suffixes=len(suffix_list))
+                                temp = Item.objects.filter(base=base_item).annotate(num_prefixes=Count('prefixes'),num_suffixes=Count('suffixes')).filter(num_prefixes=len(prefix_list)).filter(num_suffixes=len(suffix_list))
                                 for prefix in prefix_list:
                                     temp = temp.filter(prefixes=prefix)
                                 for suffix in suffix_list:
