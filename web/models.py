@@ -134,11 +134,9 @@ class ItemSuffixGroup(models.Model):
     def __unicode__( self ):
         return self.name
 
-class ItemPrefix(models.Model):
-    name = models.CharField(max_length=64)
-    modification = models.ManyToManyField(Modifier, blank=True)
+class ItemFix(models.Model):
+    modifications = models.ManyToManyField(Modifier, blank=True)
     ilevel = models.IntegerField(default=0)
-    group = models.ForeignKey('ItemPrefixGroup')
     def __unicode__( self ):
         return self.name
     def get_modifications_display(self):
@@ -148,14 +146,14 @@ class ItemPrefix(models.Model):
         result = result[:-2]
         return result
 
-class ItemSuffix(models.Model):
+class ItemPrefix(ItemFix):
     name = models.CharField(max_length=64)
-    modification = models.ManyToManyField(Modifier, blank=True)
-    ilevel = models.IntegerField(default=0)
+    group = models.ForeignKey('ItemPrefixGroup')
+
+class ItemSuffix(ItemFix):
+    name = models.CharField(max_length=64)
     group = models.ForeignKey('ItemSuffixGroup')
-    def __unicode__( self ):
-        return self.name
-    
+
 class Item(models.Model):
     name = models.CharField(max_length=64)
     ilevel = models.IntegerField(default=0)
