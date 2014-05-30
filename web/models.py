@@ -141,10 +141,12 @@ class ItemFix(models.Model):
         return self.name
     def get_modifications_display(self):
         result = ""
-        for modification in self.modification.all():
+        for modification in self.modifications.all():
             result += str(modification) + ", "
         result = result[:-2]
         return result
+    class Meta:
+        abstract = True
 
 class ItemPrefix(ItemFix):
     name = models.CharField(max_length=64)
