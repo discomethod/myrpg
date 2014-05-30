@@ -6,7 +6,28 @@
 
 {% block content %}
 {% if item %}
-        <a href="{% url 'item' item.id %}">{{ item }}</a>
+   <h3>{{ item }}</h3>
+   {% if item.base and item.base != item %}
+     <br />(<a href="{% url 'item' item.base.pk %}">{{ item.base }}</a>)
+   {% endif %}
+   {% if item.modification %}
+     <br/>Base:
+   {% endif %}
+   {% for modification in item.modification.all %}
+     <br />{{ modification }}
+   {% endfor %}
+   {% for prefix in item.prefixes.all %}
+     <br /><strong>{{ prefix }}</strong> prefix:
+     {% for modification in prefix.modifications.all %}
+       <br />{{ modification }}
+     {% endfor %}
+   {% endfor %}
+   {% for suffix in item.suffixes.all %}
+     <br /><strong>{{ suffix }}</strong> prefix:
+     {% for modification in suffix.modifications.all %}
+       <br />{{ modification }}
+     {% endfor %}
+   {% endfor %}
 {% else %}
     <p>No item to see here.</p>
 {% endif %}

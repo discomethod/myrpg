@@ -159,7 +159,8 @@ class ItemSuffix(ItemFix):
 class Item(models.Model):
     name = models.CharField(max_length=64)
     ilevel = models.IntegerField(default=0)
-    itype = models.ForeignKey('ItemType') # an item can only have one item type
+    itype = models.ForeignKey('ItemType') # an item has exactly one item type
+    base = models.ForeignKey('self', blank=True, null=True) # an item may or may not be based on another item
     prefixes = models.ManyToManyField(ItemPrefix,blank=True) # possible to have no prefixes
     suffixes = models.ManyToManyField(ItemSuffix, blank=True) # possible to have no suffixes
     slots = models.ManyToManyField(ItemSlot, blank=True) # an item can occupy multiple slots, or no slot
