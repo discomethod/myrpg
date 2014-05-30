@@ -6,12 +6,13 @@ Generate Items
 
 {% block content %}
 {% if item_list %}
-    <form role="form">
+    <form role="form" action="{% url 'itemgen' %}" method="post">
+    {% csrf_token %}
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
             <label for="baseItem">Base Item</label>
-            <select class="form-control" id="baseItem">
+            <select class="form-control" id="baseItem" name="baseItem">
             {% for item in item_list %}
               <option>{{ item }}</option>
             {% endfor %}
@@ -21,7 +22,7 @@ Generate Items
         <div class="col-md-4">
           <div class="form-group">
             <label for="prefixes">Prefixes</label>
-            <select multiple class="form-control" id="prefixes">
+            <select multiple class="form-control" id="prefixes" name="prefixgroup">
             {% for prefix in prefix_list %}
               <option>{{ prefix }}</option>
             {% endfor %}
@@ -31,7 +32,7 @@ Generate Items
         <div class="col-md-4">
           <div class="form-group">
             <label for="suffixes">Suffixes</label>
-            <select multiple class="form-control" id="suffixes">
+            <select multiple class="form-control" id="suffixes" name="suffixgroup">
             {% for suffix in suffix_list %}
               <option>{{ suffix }}</option>
             {% endfor %}
@@ -39,6 +40,12 @@ Generate Items
           </div>
             
         </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 center-block">
+          <input type="submit" value="Generate" />
+        </div>
+      </div>
     </form>
 {% else %}
     <p>Nothing to see here.</p>
