@@ -1,3 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}
+All Items
+{% endblock %}
+
+{% block content %}
 {% if item_list %}
     <ul>
     {% for item in item_list %}
@@ -7,4 +14,4 @@
 {% else %}
     <p>No items to see here.</p>
 {% endif %}
-
+{% endblock %}

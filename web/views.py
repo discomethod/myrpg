@@ -10,12 +10,11 @@ def index(request):
 
 def itemlist(request):
     item_list = Item.objects.order_by('name')
-    template = loader.get_template('web/index.html')
-    context = RequestContext(request, {
-        'item_list': item_list,
-    })
-    return HttpResponse(template.render(context))
+    context = {'item_list': item_list}
+    return render(request, 'web/itemlist.html', context)
 
 def item(request, item_id):
-    return HttpResponse("You are looking at item %s." % item_id)
+    item = Item.objects.get(pk=item_id)
+    context = {'item': item}
+    return render(request, 'web/item.html', context)
 
