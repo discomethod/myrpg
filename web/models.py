@@ -165,6 +165,11 @@ class Item(models.Model):
     suffixes = models.ManyToManyField(ItemSuffix, blank=True) # possible to have no suffixes
     slots = models.ManyToManyField(ItemSlot, blank=True) # an item can occupy multiple slots, or no slot
     modification = models.ManyToManyField(Modifier, blank=True) # an item can have no modifications
+    RARITIES = ['Common', 'Uncommon', 'Rare','Epic',]
+    RARITY_CHOICES = []
+    for RARITY in RARITIES:
+        RARITY_CHOICES.append((RARITY[:3].upper(),RARITY))
+    rarity = models.CharField(max_length=3, choices=RARITY_CHOICES, default=RARITY_CHOICES[0][0])
     def __unicode__( self ):
         return self.name
     def is_base(self):
