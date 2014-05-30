@@ -127,16 +127,23 @@ class Character(models.Model):
     
 class ItemPrefix(models.Model):
     name = models.CharField(max_length=64)
-    modification = models.ManyToManyField(Modifier)
+    modification = models.ManyToManyField(Modifier, blank=True)
+    def __unicode__( self ):
+        return self.name
 
 class ItemSuffix(models.Model):
     name = models.CharField(max_length=64)
-    modification = models.ManyToManyField(Modifier)
+    modification = models.ManyToManyField(Modifier, blank=True)
+    def __unicode__( self ):
+        return self.name
     
-class Item(models.Model):    
+class Item(models.Model):
+    name = models.CharField(max_length=64)
     ilevel = models.IntegerField(default=0)
     itype = models.ForeignKey('ItemType') # an item can only have one item type
-    prefixes = models.ManyToManyField(ItemPrefix)
-    suffixes = models.ManyToManyField(ItemSuffix)
-    slots = models.ManyToManyField(ItemSlot) # an item can occupy multiple slots
-    modification = models.ManyToManyField(Modifier)
+    prefixes = models.ManyToManyField(ItemPrefix,blank=True) # possible to have no prefixes
+    suffixes = models.ManyToManyField(ItemSuffix, blank=True) # possible to have no suffixes
+    slots = models.ManyToManyField(ItemSlot, blank=True) # an item can occupy multiple slots, or no slot
+    modification = models.ManyToManyField(Modifier, blank=True) # an item can have no modifications
+    def __unicode__( self ):
+        return self.name
