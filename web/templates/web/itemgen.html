@@ -14,7 +14,7 @@ Generate Items
             <label for="baseItem">Base Item</label>
             <select class="form-control" id="baseItem" name="baseItem">
             {% for item in item_list %}
-              <option>{{ item }}</option>
+              <option value="{{ item.pk }}">{{ item }}</option>
             {% endfor %}
             </select>
           </div>
@@ -24,7 +24,7 @@ Generate Items
             <label for="prefixes">Prefixes</label>
             <select multiple class="form-control" id="prefixes" name="prefixgroup">
             {% for prefix in prefix_list %}
-              <option>{{ prefix }}</option>
+              <option value="{{ prefix.pk }}">{{ prefix }}</option>
             {% endfor %}
             </select>
           </div>
@@ -34,7 +34,7 @@ Generate Items
             <label for="suffixes">Suffixes</label>
             <select multiple class="form-control" id="suffixes" name="suffixgroup">
             {% for suffix in suffix_list %}
-              <option>{{ suffix }}</option>
+              <option value="{{ suffix.pk }}">{{ suffix }}</option>
             {% endfor %}
             </select>
           </div>

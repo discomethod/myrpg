@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import RequestContext, loader
 
-from web.models import Item, ItemPrefixGroup, ItemSuffixGroup
+from web.models import Item, ItemPrefix, ItemSuffix, ItemPrefixGroup, ItemSuffixGroup
 
 # Create your views here.
 def index(request):
@@ -39,8 +39,16 @@ def itemgen(request):
     else:
         # we now have a base item to work with
         # get all the possible prefixes
-        prefixgroup_list = request.POST.getlist('prefixgroup')
-        suffixgroup_list = request.POST.getlist('suffixgroup')
+        prefixgroup_post_list = request.POST.getlist('prefixgroup')
+        suffixgroup_post_list = request.POST.getlist('suffixgroup')
+        prefixgroup_list = list()
+        suffixgroup_list = list()
+        # convert POST data to objects
+        for prefixgroup_post in prefixgroup_post_list:
+            prefixgroup_list.append(ItemPrefix.objects.get(pk=prefixgroup_post))
+        for suffixgroup_post in suffixgroup_post_list:
+            suffixgroup_list.append(ItemSuffix.objects.get(pk=suffixgroup_post))
+        # iterate through all possible prefix/suffix combinations
         for prefixgroup1 in prefixgroup_list:
             for prefixgroup2 in prefixgroup_list:
                 for prefixgroup3 in prefixgroup_list:
@@ -75,28 +83,41 @@ def itemgen(request):
                                 suffix_list = []
                                 for prefixgroup in prefixgroup_set:
                                     # only add best prefix
-                                    prefix_list.append(ItemPrefix.objects.filter(group=prefixgroup).filter(ilevel__lte=new_item.ilevel).order_by('-itemlevel')[0])
+                                    try:
+                                        prefix_list.append(ItemPrefix.objects.filter(group=prefixgroup).filter(ilevel__lte=new_item.ilevel).order_by('-ilevel')[0])
+                                    except IndexError:
+                                        # no prefix in this prefix group is suitable for this item
+                                        continue
                                 for suffixgroup in suffixgroup_set:
                                     # only add best suffix
-                                    suffix_list.append(ItemSuffix.objects.filter(group=suffixgroup).filter(ilevel__lte=new_item.ilevel).order_by('-itemlevel')[0])
+                                    try:
+                                        suffix_list.append(ItemSuffix.objects.filter(group=suffixgroup).filter(ilevel__lte=new_item.ilevel).order_by('-ilevel')[0])
+                                    except IndexError:
+                                        # no suffix in this suffix group is suitable for this item
+                                        continue
                                 
                                 # check if we found enough to add
                                 if len(prefix_list) + len(suffix_list) < 1:
                                     continue
                                 # check if the item we are about to create already exists
-                                temp = Item.objects.filter(base=base_item).annotate(num_prefixes=Count('prefixes'),num_suffixes=Count('suffixes')
+                                temp = Item.objects.filter(base=base_item).annotate(num_prefixes=Count('prefixes'),num_suffixes=Count('suffixes'))
                                 temp = temp.filter(num_prefixes=len(prefix_list)).filter(num_suffixes=len(suffix_list))
                                 for prefix in prefix_list:
                                     temp = temp.filter(prefixes=prefix)
-                                    new_item.prefixes.add(prefix)
                                 for suffix in suffix_list:
                                     temp = temp.filter(suffixes=suffix)
-                                    new_item.suffixes.add(suffix)
-                                if temp != None:
+                                if len(temp) > 0:
                                     # this item already exists
                                     # implement override by setting new_item pk to the found item's pk
                                     continue
                                 # this item doesn't already exist
+                                # save this item to get its pk
+                                new_item.name="NEWITEM"
+                                new_item.save()
+                                for prefix in prefix_list:
+                                    new_item.prefixes.add(prefix)
+                                for suffix in suffix_list:
+                                    new_item.suffixes.add(suffix)
                                 # generate this item's rarity
                                 if len(prefix_list) + len(suffix_list) > 2:
                                     new_item.rarity = "RAR"
@@ -104,19 +125,20 @@ def itemgen(request):
                                     new_item.rarity = "UNC"
                                 # generate this item's name
                                 if new_item.rarity == "UNC":
+                                    new_item.name = base_item.name
                                     # just prepend prefix and append suffix
                                     if len(prefix_list) > 0:
-                                        new_item.name = str(prefix_list[0]) + new_item.name
+                                        new_item.name = str(prefix_list[0]).lower() + " " +  new_item.name
                                     if len(suffix_list) > 0:
-                                        new_item.name = new_item.name + str(suffix_list[0])
+                                        new_item.name = new_item.name + " " + str(suffix_list[0]).lower()
                                 else:
                                     # rare name
                                     temp_name = base_item.name
                                     while len(Item.objects.filter(name=temp_name)) > 0:
                                         RARE_PREFIXES = ["Glory", "Kraken", "Final",]
                                         RARE_SUFFIXES = new_item.itype.rarenames.all()
-                                        rare_prefix = RARE_PREFIXES[randrange(len(RARE_PREFIXES))]
-                                        rare_suffix = RARE_SUFFIXES[randrange(len(RARE_SUFFIXES))]
+                                        rare_prefix = str(RARE_PREFIXES[randrange(len(RARE_PREFIXES))])
+                                        rare_suffix = str(RARE_SUFFIXES[randrange(len(RARE_SUFFIXES))])
                                         temp_name = rare_prefix + " " + rare_suffix
                                     new_item.name = temp_name
                                 # save this new item
