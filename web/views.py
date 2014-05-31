@@ -1,4 +1,5 @@
-from copy import copy, deepcopy
+from copy import copy
+from itertools import combination
 from random import randrange
 
 from django.db.models import Count
@@ -37,6 +38,11 @@ def itemgen(request):
                    }
         return render(request, 'web/itemgen.html', context)
     else:
+        # define some characteristics of generating prefix/suffixes
+        CORE_PREFIX_MAX = 3 # absolute maximum number of prefixes
+        CORE_SUFFIX_MAX = 3 # absolute maximum number of suffixes
+        CORE_FIXES_FROM_AFFIXGROUP = 3 # how many of the top affixes to pick from each fixgroup
+        CORE_FIX_DISCREPANCY = 1 # maxmimum difference between number of fixes
         # we now have a base item to work with
         # get all the possible prefixes
         prefixgroup_post_list = request.POST.getlist('prefixgroup')
@@ -48,6 +54,46 @@ def itemgen(request):
             prefixgroup_list.append(ItemPrefix.objects.get(pk=prefixgroup_post))
         for suffixgroup_post in suffixgroup_post_list:
             suffixgroup_list.append(ItemSuffix.objects.get(pk=suffixgroup_post))
+        # sort affixgroup lists by the id of the affixgroup
+        prefixgroup_list.sort(key = lambda x: x.pk)
+        suffixgroup_list.sort(key = lambda x: x.pk)
+        # get all the data for the affixgroups
+        prefixes_possible_bygroup = dict()
+        suffixes_possible_bygroup = dict()
+        for prefixgroup in prefixgroup_list:
+            prefixes_possible_bygroup[prefixgroup.pk] = ItemPrefix.objects.filter(group=prefixgroup)[:CORE_FIXES_FROM_AFFIXGROUP]
+        for suffixgroup in suffixgroup_list:
+            suffixes_possible_bygroup[suffixgroup.pk] = ItemSuffix.objects.filter(group=suffixgroup)[:CORE_FIXES_FROM_AFFIXGROUP]
+        # max CORE_PREFIX_MAX prefixes, less if there aren't enough to choose from, and no more than CORE_FIX_DISCREPANCY more than the number of suffixes
+        prefix_max = min(CORE_PREFIX_MAX,len(prefixgroup_list),len(suffixgroup_list)+CORE_FIX_DISCREPANCY)
+        # max CORE_SUFFIX_MAX suffixes, less if there aren't enough to choose from, and no more than CORE_FIX_DISCREPANCY more than the number of prefixes
+        suffix_max = min(CORE_SUFFIX_MAX,len(suffixgroup_list),len(prefixgroup_list)+CORE_FIX_DISCREPANCY)
+        for prefix_num in range(prefix_max+1): # number of prefixes from 0 to prefix_max INCLUSIVE
+            for suffix_num in range(suffix_max+1):# number of suffixes from 0 to prefix_max INCLUSIVE
+                # degenerate case if prefix and suffix are both 0
+                if prefix_num + suffix_num = 0:
+                    continue
+                # generate all possible items with prefix_num prefixes and suffix_num suffixes
+                for prefixgroup_combination in combination(prefixgroup_list,prefix_num):
+                    for sufixgroup_combination in combination(suffixgroup_list,suffix_num):
+                        # affixgroup_combination is a list of the primary keys of the affixgroups we are going to add
+                        # e.g., [P1,P3,P7,]
+                        # if the affixgroup list is empty, or affixgroup_num is 0, we get an empty list []
+                        prefixes_possible = [[None,] for ii in range(CORE_PREFIX_MAX)]
+                        suffixes_possible = [[None,] for ii in range(CORE_PREFIX_MAX)]
+                        for pindex, prefixgroup in enumerate(prefixgroup_combination):
+                            prefixes_possible[pindex] = prefixes_possible_bygroup[prefixgroup.pk]
+                        for sindex, suffixgroup in enumerate(suffixgroup_combination):
+                            suffixes_possible[sindex] = suffixes_possible_bygroup[suffixgroup.pk]
+                        
+                        # WORK IN PROGRESS HERE #
+                        
+                       # shallow copy the base_item
+                                new_item = copy(base_item)
+                                # remove the primary key, so it will be CREATE rather than UPDATE
+                                new_item.pk = None
+                                # add base item relationship
+                                new_item.base = base_item
         # iterate through all possible prefix/suffix combinations
         for prefixgroup1 in prefixgroup_list:
             for prefixgroup2 in prefixgroup_list:
@@ -73,7 +119,7 @@ def itemgen(request):
                                 # add all suffixes in suffixgroup_set
                                 
                                 # shallow copy the base item
-                                new_item = deepcopy(base_item)
+                                new_item = copy(base_item)
                                 # erase the primary key
                                 new_item.pk = None
                                 # add base relation
@@ -134,7 +180,28 @@ def itemgen(request):
                                     # rare name
                                     temp_name = base_item.name
                                     while len(Item.objects.filter(name=temp_name)) > 0:
-                                        RARE_PREFIXES = ["Glory", "Kraken", "Final",]
+                                        RARE_PREFIXES = ["Agony", "Apocalypse", "Armageddon",
+                                                            "Beast", "Behemoth", "Blight",
+                                                            "Blood", "Bramble", "Brimstone",
+                                                            "Brood", "Carrion", "Cataclysm",
+                                                            "Chimeric", "Corpse", "Corruption",
+                                                            "Damnation", "Death", "Demon",
+                                                            "Dire", "Dragon", "Dread",
+                                                            "Doom", "Dusk", "Eagle", "Empire",
+                                                            "Empyrean", "Fate", "Foe",
+                                                            "Gale", "Ghoul", "Gloom",
+                                                            "Glyph", "Golem", "Grim",
+                                                            "Hate", "Havoc", "Honor",
+                                                            "Horror", "Hypnotic", "Kraken",
+                                                            "Loath", "Maelstrom", "Mind",
+                                                            "Miracle", "Morbid", "Oblivion",
+                                                            "Onslaught", "Pain", "Pandemonium",
+                                                            "Phoenix", "Plague", "Rage",
+                                                            "Rapture", "Rune", "Skull",
+                                                            "Sol", "Soul", "Sorrow",
+                                                            "Spirit", "Storm", "Tempest",
+                                                            "Torment", "Vengeance", "Victory",
+                                                            "Viper", "Vortex", "Woe", "Wrath",]
                                         RARE_SUFFIXES = new_item.itype.rarenames.all()
                                         rare_prefix = str(RARE_PREFIXES[randrange(len(RARE_PREFIXES))])
                                         rare_suffix = str(RARE_SUFFIXES[randrange(len(RARE_SUFFIXES))])
@@ -161,4 +228,3 @@ def item(request, item_id):
     item = Item.objects.get(pk=item_id)
     context = {'item': item}
     return render(request, 'web/item.html', context)
-
