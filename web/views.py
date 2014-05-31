@@ -1,5 +1,5 @@
 from copy import copy
-from itertools import combination
+from itertools import combinations
 from random import randrange
 
 from django.db.models import Count
@@ -71,7 +71,7 @@ def itemgen(request):
         for prefix_num in range(prefix_max+1): # number of prefixes from 0 to prefix_max INCLUSIVE
             for suffix_num in range(suffix_max+1):# number of suffixes from 0 to prefix_max INCLUSIVE
                 # degenerate case if prefix and suffix are both 0
-                if prefix_num + suffix_num = 0:
+                if prefix_num + suffix_num == 0:
                     continue
                 # generate all possible items with prefix_num prefixes and suffix_num suffixes
                 for prefixgroup_combination in combination(prefixgroup_list,prefix_num):
@@ -87,7 +87,7 @@ def itemgen(request):
                             suffixes_possible[sindex] = suffixes_possible_bygroup[suffixgroup.pk]
                         
                         # WORK IN PROGRESS HERE #
-                        
+                        """ 
                        # shallow copy the base_item
                                 new_item = copy(base_item)
                                 # remove the primary key, so it will be CREATE rather than UPDATE
@@ -209,6 +209,7 @@ def itemgen(request):
                                     new_item.name = temp_name
                                 # save this new item
                                 new_item.save()
+                        """
 
         item_list = Item.objects.filter(base__isnull=True).order_by('name')
         prefix_list = ItemPrefixGroup.objects.order_by('name')
