@@ -52,11 +52,16 @@ ITEM TYPES:
 """
 class ItemType(models.Model):
     name = models.CharField(max_length=64)
-    rarenames = models.ManyToManyField('ItemTypeRare', blank=True)
+    raresuffixes = models.ManyToManyField('ItemRareSuffix', blank=True)
     def __unicode__( self ):
         return self.name
 
-class ItemTypeRare(models.Model):
+class ItemRarePrefix(models.Model):
+    name = models.CharField(max_length=64)
+    def __unicode__(self):
+        return self.name
+
+class ItemRareSuffix(models.Model):
     name = models.CharField(max_length=64)
     def __unicode__(self):
         return self.name
