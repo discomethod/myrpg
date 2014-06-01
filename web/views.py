@@ -6,8 +6,9 @@ from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import RequestContext, loader
+from django.utils.html import escape
 
-from web.models import Item, ItemPrefix, ItemSuffix, ItemPrefixGroup, ItemSuffixGroup
+from web.models import Item, ItemPrefix, ItemSuffix, ItemPrefixGroup, ItemSuffixGroup, ItemRarePrefix, ItemRareSuffix
 
 # Create your views here.
 def index(request):
@@ -20,7 +21,8 @@ def itemgen(request):
         # current_state is the list of the current sequence, e.g. [P1, P2, P3, S1,]
         # affixgroup_combination is a list [AG1, AG2, AG3,]
         # affixes_possible is a list [[P1, P2, P3,], [P4, P5, P6,], [P7, P8, P9],]
-        
+        if current_state == None:
+            current_state = []
         # calculate how many more affixes still need to be added
         toadd = len(prefixgroup_combination)+len(suffixgroup_combination)-len(current_state)
         current_state_new = []
@@ -33,14 +35,18 @@ def itemgen(request):
             # exit case
             # determine if we should add prefix or suffix
             if len(current_state) >= len(prefixgroup_combination):
-                # all prefixes have been added, we need to add a suffix
-                for suffix_possible in suffixes_possible[-1]:
-                    return_sublist = current_state + suffix_possible
+                # all prefixes have been added
+                # we need to add a suffix
+                for suffix_possible in suffixes_possible[len(current_state)-len(prefixgroup_combination)]:
+                    return_sublist = current_state[:]
+                    return_sublist.append(suffix_possible.pk)
                     return_masterlist.append(return_sublist)
             else:
-                # last thing to add is a prefix
-                for prefix_possible in prefixes_possible[-1]:
-                    return_sublist = current_state + suffix_possible
+                # not all prefixes have been added
+                # we need to add a prefix
+                for prefix_possible in prefixes_possible[len(current_state)]:
+                    return_sublist = current_state[:]
+                    return_sublist.append(prefix_possible.pk)
                     return_masterlist.append(return_sublist)
             return return_masterlist
         else:
@@ -48,13 +54,15 @@ def itemgen(request):
             if len(current_state) < len(prefixgroup_combination):
                 # we still need to add prefixes
                 for prefix_possible in prefixes_possible[len(current_state)]:
-                    current_state_new = current_state + prefix_possible
+                    current_state_new = current_state[:]
+                    current_state_new.append(prefix_possible.pk)
                     return_masterlist += generate_affix_list( current_state_new, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible)
                 return return_masterlist
             else:
                 # we still need to add suffixes
                 for suffix_possible in suffixes_possible[len(current_state)-len(prefixgroup_combination)]:
-                    current_state_new = current_state + suffix_possible
+                    current_state_new = current_state[:]
+                    current_state_new.append(suffix_possible.pk)
                     return_masterlist += generate_affix_list( current_state_new, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible)
                 return return_masterlist
     
@@ -94,9 +102,9 @@ def itemgen(request):
         suffixgroup_list = list()
         # convert POST data to objects
         for prefixgroup_post in prefixgroup_post_list:
-            prefixgroup_list.append(ItemPrefix.objects.get(pk=prefixgroup_post))
+            prefixgroup_list.append(ItemPrefixGroup.objects.get(pk=prefixgroup_post))
         for suffixgroup_post in suffixgroup_post_list:
-            suffixgroup_list.append(ItemSuffix.objects.get(pk=suffixgroup_post))
+            suffixgroup_list.append(ItemSuffixGroup.objects.get(pk=suffixgroup_post))
         # sort affixgroup lists by the id of the affixgroup
         prefixgroup_list.sort(key = lambda x: x.pk)
         suffixgroup_list.sort(key = lambda x: x.pk)
@@ -104,13 +112,14 @@ def itemgen(request):
         prefixes_possible_bygroup = dict()
         suffixes_possible_bygroup = dict()
         for prefixgroup in prefixgroup_list:
-            prefixes_possible_bygroup[prefixgroup.pk] = ItemPrefix.objects.filter(group=prefixgroup)[:CORE_FIXES_FROM_AFFIXGROUP]
+            prefixes_possible_bygroup[prefixgroup.pk] = ItemPrefix.objects.filter(group=prefixgroup).filter(ilevel__lte=base_item.ilevel)[:CORE_FIXES_FROM_AFFIXGROUP]
         for suffixgroup in suffixgroup_list:
-            suffixes_possible_bygroup[suffixgroup.pk] = ItemSuffix.objects.filter(group=suffixgroup)[:CORE_FIXES_FROM_AFFIXGROUP]
+            suffixes_possible_bygroup[suffixgroup.pk] = ItemSuffix.objects.filter(group=suffixgroup).filter(ilevel__lte=base_item.ilevel)[:CORE_FIXES_FROM_AFFIXGROUP]
         # max CORE_PREFIX_MAX prefixes, less if there aren't enough to choose from, and no more than CORE_FIX_DISCREPANCY more than the number of suffixes
         prefix_max = min(CORE_PREFIX_MAX,len(prefixgroup_list),len(suffixgroup_list)+CORE_FIX_DISCREPANCY)
         # max CORE_SUFFIX_MAX suffixes, less if there aren't enough to choose from, and no more than CORE_FIX_DISCREPANCY more than the number of prefixes
         suffix_max = min(CORE_SUFFIX_MAX,len(suffixgroup_list),len(prefixgroup_list)+CORE_FIX_DISCREPANCY)
+        render_out = ""
         for prefix_num in range(prefix_max+1): # number of prefixes from 0 to prefix_max INCLUSIVE
             for suffix_num in range(suffix_max+1):# number of suffixes from 0 to prefix_max INCLUSIVE
                 # degenerate case if prefix and suffix are both 0
@@ -119,8 +128,8 @@ def itemgen(request):
                 if prefix_num+1 < suffix_num or suffix_num+1 < prefix_num:
                     continue
                 # generate all possible items with prefix_num prefixes and suffix_num suffixes
-                for prefixgroup_combination in combination(prefixgroup_list,prefix_num):
-                    for sufixgroup_combination in combination(suffixgroup_list,suffix_num):
+                for prefixgroup_combination in combinations(prefixgroup_list,prefix_num):
+                    for suffixgroup_combination in combinations(suffixgroup_list,suffix_num):
                         # affixgroup_combination is a list of the primary keys of the affixgroups we are going to add
                         # e.g., [AG1,AG3,AG7,] or [AG1, AG3,] (i.e., no padding)
                         # if the affixgroup list is empty, or affixgroup_num is 0, we get an empty list []
@@ -130,13 +139,28 @@ def itemgen(request):
                             prefixes_possible[pindex] = prefixes_possible_bygroup[prefixgroup.pk]
                         for sindex, suffixgroup in enumerate(suffixgroup_combination):
                             suffixes_possible[sindex] = suffixes_possible_bygroup[suffixgroup.pk]
+                        #render_out += "prefixes_possible is " + escape(str(prefixes_possible)) + ", and suffixes_possible is " + escape(str(suffixes_possible)) + ".<br />"
                         current_state = []
                         affixes_list = generate_affix_list( current_state, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible )
+                        if len(affixes_list) == 0:
+                            # this will sometimes occure if the only affix group has no affixes with low enough ilevel
+                            continue
+                        #render_out += escape("prefix num is " + str(prefix_num) + ", suffix num is " + str(suffix_num) + ". the prefixgroup_combination is " + str(prefixgroup_combination) + ", the suffixgroup_combination is " + str(suffixgroup_combination))
+                        #render_out += ", and the generated affixes list is " + str(affixes_list)
+                        #render_out += "<br /><br />"
+        #return HttpResponse(render_out)    
                         for affix_list in affixes_list:
                             # affix_list is a list containing [P1, P3, P8, S1, S3,], etc.
                             # split it into a prefix_list and an suffix_list
-                            prefix_list = affix_list[:len(prefixgroup_combination)]
-                            suffix_list = affix_list[len(prefixgroup_combination):]
+                            prefix_list_pks = affix_list[:len(prefixgroup_combination)]
+                            suffix_list_pks = affix_list[len(prefixgroup_combination):]
+                            prefix_list = []
+                            suffix_list = []
+                            # convert from PKs back into affix objects
+                            for prefix_pk in prefix_list_pks:
+                                prefix_list.append(ItemPrefix.objects.get(pk=prefix_pk))
+                            for suffix_pk in suffix_list_pks:
+                                suffix_list.append(ItemSuffix.objects.get(pk=suffix_pk))
                             # check if the item we are about to create already exists
                             temp = Item.objects.filter(base=base_item).annotate(num_prefixes=Count('prefixes'),num_suffixes=Count('suffixes')).filter(num_prefixes=len(prefixgroup_combination)).filter(num_suffixes=len(suffixgroup_combination))
                             for prefix in prefix_list:
@@ -155,16 +179,16 @@ def itemgen(request):
                             new_item.name="NEWITEM"
                             new_item.save()
                             # copy slots from base item
-                            for slot in base_item.slots:
+                            for slot in base_item.slots.all():
                                 new_item.slots.add(slot)
                             # copy base modifications form base item
-                            for mod in base_item.modification:
+                            for mod in base_item.modification.all():
                                 new_item.modification.add(mod)
                             # add the new item's affixes
                             for prefix in prefix_list:
-                                new_item = new_item.prefixes.add(prefix)
+                                new_item.prefixes.add(prefix)
                             for suffix in suffix_list:
-                                new_item = new_item.suffixes.add(suffix)
+                                new_item.suffixes.add(suffix)
                             # generate the new item's rarity
                             if len(affix_list) > 2:
                                 new_item.rarity = "RAR"
@@ -183,7 +207,7 @@ def itemgen(request):
                                 # rare name
                                 temp_name = base_item.name
                                 while len(Item.objects.filter(name=temp_name)) > 0:
-                                    """
+                                    
                                     RARE_PREFIXES = ["Agony", "Apocalypse", "Armageddon",
                                                         "Beast", "Behemoth", "Blight",
                                                         "Blood", "Bramble", "Brimstone",
@@ -206,7 +230,7 @@ def itemgen(request):
                                                         "Spirit", "Storm", "Tempest",
                                                         "Torment", "Vengeance", "Victory",
                                                         "Viper", "Vortex", "Woe", "Wrath",]
-                                    """
+                                    
                                     RARE_PREFIXES = ItemRarePrefix.objects.all()
                                     RARE_SUFFIXES = new_item.itype.raresuffixes.all()
                                     rare_prefix = str(RARE_PREFIXES[randrange(len(RARE_PREFIXES))])
