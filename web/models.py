@@ -162,10 +162,14 @@ class ItemFix(models.Model):
 class ItemPrefix(ItemFix):
     name = models.CharField(max_length=64)
     group = models.ForeignKey('ItemPrefixGroup')
+    def __unicode__(self):
+        return self.name
 
 class ItemSuffix(ItemFix):
     name = models.CharField(max_length=64)
     group = models.ForeignKey('ItemSuffixGroup')
+    def __unicode__(self):
+        return self.name
 
 class Item(models.Model):
     name = models.CharField(max_length=64)
