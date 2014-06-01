@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}
+All Affixes
+{% endblock %}
+
+{% block content %}
+{% if prefixgroup_list or suffixgroup_list %}
+    <h3>Prefix Groups</h3>
+    <ul>
+    {% for prefixgroup in prefixgroup_list %}
+        <li><a href="#">{{ prefixgroup }}</a></li>
+    {% endfor %}
+    </ul>
+    <h3>Suffix Groups</h3>
+    <ul>
+    {% for suffixgroup in suffixgroup_list %}
+        <li><a href="#">{{ suffixgroup }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No items to see here.</p>
+{% endif %}
+{% endblock %}
