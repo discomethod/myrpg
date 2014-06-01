@@ -192,3 +192,22 @@ class Item(models.Model):
     is_base.admin_order_field = 'base'
     is_base.boolean = True
     is_base.short_description = 'Base Item'
+    def htmlname(self):
+        return_string = "<font color=\""
+        if self.rarity=="COM":
+            # common item
+            return_string += "#808080"
+        elif self.rarity=="UNC":
+            # uncommon item
+            return_string += "#89AC00"
+        elif self.rarity=="RAR":
+            # rare item
+            return_string += "#FFBB00"
+        elif self.rarity=="EPI":
+            # epic item
+            return_string += "#4C2982"
+        else:
+            return_string += "#000"
+        return_string += "\">" + self.name + "</font>"
+        return return_string
+

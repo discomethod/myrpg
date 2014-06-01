@@ -5,8 +5,9 @@
 {% endblock %}
 
 {% block content %}
+{% autoescape off %}
 {% if item %}
-   <h3>{{ item }}</h3>
+   <h3>{{ item.htmlname }}</h3>
    {% if item.base and item.base != item %}
      <br />(<a href="{% url 'item' item.base.pk %}">{{ item.base }}</a>)
    {% endif %}
@@ -31,5 +32,6 @@
 {% else %}
     <p>No item to see here.</p>
 {% endif %}
+{% endautoescape %}
 {% endblock %}
 

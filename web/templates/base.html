@@ -31,7 +31,8 @@
         </div>
         <div class="collapse navbar-collapse" id="navbar-content">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="{% url 'itemlist' %}">All Items</a></li>
+            <li class="{% if header_tab == 'items' %}active{% endif %}"><a href="{% url 'itemlist' %}">All Items</a></li>
+            <li class="{% if header_tab == 'affixes' %}active{% endif %}"><a href="{% url 'affixlist' %}">All Affixes</a></li>
           </ul>
         </div>
       </div>

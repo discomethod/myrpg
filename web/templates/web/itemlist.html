@@ -5,13 +5,15 @@ All Items
 {% endblock %}
 
 {% block content %}
+{% autoescape off %}
 {% if item_list %}
     <ul>
     {% for item in item_list %}
-        <li><a href="{% url 'item' item.id %}">{{ item }}</a></li>
+        <li><a href="{% url 'item' item.id %}">{{ item.htmlname }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No items to see here.</p>
 {% endif %}
+{% endautoescape %}
 {% endblock %}
