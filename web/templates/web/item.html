@@ -7,9 +7,9 @@
 {% block content %}
 {% autoescape off %}
 {% if item %}
-   <h3>{{ item.htmlname }}</h3>
+   <h3 class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</h3>
    {% if item.base and item.base != item %}
-     <br />(<a href="{% url 'item' item.base.pk %}">{{ item.base }}</a>)
+     <br />(based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a>)
    {% endif %}
    {% if item.modification %}
      <br/>Base:

@@ -1,3 +1,27 @@
+a:hover {
+  text-decoration: none;
+}
 .text-item-common {
-  color: #8a6d3b;
+  color: #808080;
+}
+a.text-item-common:hover {
+  color: #676767;
+}
+.text-item-uncommon {
+  color: #89AC00;
+}
+a.text-item-uncommon:hover {
+  color: #709300;
+}
+.text-item-rare {
+  color: #FFBB00;
+}
+a.text-item-rare:hover {
+  color: #E6A200;
+}
+.text-item-epic {
+  color: #4C2982;
+}
+a.text-item-epic:hover {
+  color: #331069;
 }

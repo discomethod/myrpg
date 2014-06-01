@@ -130,7 +130,6 @@ def itemgen(request):
         prefix_max = min(CORE_PREFIX_MAX,len(prefixgroup_list),len(suffixgroup_list)+CORE_FIX_DISCREPANCY)
         # max CORE_SUFFIX_MAX suffixes, less if there aren't enough to choose from, and no more than CORE_FIX_DISCREPANCY more than the number of prefixes
         suffix_max = min(CORE_SUFFIX_MAX,len(suffixgroup_list),len(prefixgroup_list)+CORE_FIX_DISCREPANCY)
-        render_out = ""
         for prefix_num in range(prefix_max+1): # number of prefixes from 0 to prefix_max INCLUSIVE
             for suffix_num in range(suffix_max+1):# number of suffixes from 0 to prefix_max INCLUSIVE
                 # degenerate case if prefix and suffix are both 0
@@ -150,16 +149,11 @@ def itemgen(request):
                             prefixes_possible[pindex] = prefixes_possible_bygroup[prefixgroup.pk]
                         for sindex, suffixgroup in enumerate(suffixgroup_combination):
                             suffixes_possible[sindex] = suffixes_possible_bygroup[suffixgroup.pk]
-                        #render_out += "prefixes_possible is " + escape(str(prefixes_possible)) + ", and suffixes_possible is " + escape(str(suffixes_possible)) + ".<br />"
                         current_state = []
                         affixes_list = generate_affix_list( current_state, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible )
                         if len(affixes_list) == 0:
                             # this will sometimes occure if the only affix group has no affixes with low enough ilevel
-                            continue
-                        #render_out += escape("prefix num is " + str(prefix_num) + ", suffix num is " + str(suffix_num) + ". the prefixgroup_combination is " + str(prefixgroup_combination) + ", the suffixgroup_combination is " + str(suffixgroup_combination))
-                        #render_out += ", and the generated affixes list is " + str(affixes_list)
-                        #render_out += "<br /><br />"
-        #return HttpResponse(render_out)    
+                            continue   
                         for affix_list in affixes_list:
                             # affix_list is a list containing [P1, P3, P8, S1, S3,], etc.
                             # split it into a prefix_list and an suffix_list
@@ -218,30 +212,6 @@ def itemgen(request):
                                 # rare name
                                 temp_name = base_item.name
                                 while len(Item.objects.filter(name=temp_name)) > 0:
-                                    
-                                    RARE_PREFIXES = ["Agony", "Apocalypse", "Armageddon",
-                                                        "Beast", "Behemoth", "Blight",
-                                                        "Blood", "Bramble", "Brimstone",
-                                                        "Brood", "Carrion", "Cataclysm",
-                                                        "Chimeric", "Corpse", "Corruption",
-                                                        "Damnation", "Death", "Demon",
-                                                        "Dire", "Dragon", "Dread",
-                                                        "Doom", "Dusk", "Eagle", "Empire",
-                                                        "Empyrean", "Fate", "Foe",
-                                                        "Gale", "Ghoul", "Gloom",
-                                                        "Glyph", "Golem", "Grim",
-                                                        "Hate", "Havoc", "Honor",
-                                                        "Horror", "Hypnotic", "Kraken",
-                                                        "Loath", "Maelstrom", "Mind",
-                                                        "Miracle", "Morbid", "Oblivion",
-                                                        "Onslaught", "Pain", "Pandemonium",
-                                                        "Phoenix", "Plague", "Rage",
-                                                        "Rapture", "Rune", "Skull",
-                                                        "Sol", "Soul", "Sorrow",
-                                                        "Spirit", "Storm", "Tempest",
-                                                        "Torment", "Vengeance", "Victory",
-                                                        "Viper", "Vortex", "Woe", "Wrath",]
-                                    
                                     RARE_PREFIXES = ItemRarePrefix.objects.all()
                                     RARE_SUFFIXES = new_item.itype.raresuffixes.all()
                                     rare_prefix = str(RARE_PREFIXES[randrange(len(RARE_PREFIXES))])
@@ -262,7 +232,7 @@ def itemgen(request):
         return render(request, 'web/itemgen.html', context)
 
 def itemlist(request):
-    item_list = Item.objects.order_by('name')
+    item_list = Item.objects.order_by('itype__name','-ilevel','name')
     context = {'header_tab': 'items', 'item_list': item_list}
     return render(request, 'web/itemlist.html', context)
 
