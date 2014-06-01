@@ -2,9 +2,9 @@ from copy import copy
 from itertools import combinations
 from random import randrange
 
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.template import RequestContext, loader
 from django.utils.html import escape
 
@@ -14,6 +14,20 @@ from web.models import Item, ItemPrefix, ItemSuffix, ItemPrefixGroup, ItemSuffix
 def index(request):
     # not used...
     return HttpResponse("Hello, world. You're at the web index.")
+
+def prefix(request, affix_id):
+    prefix = get_object_or_404(ItemPrefix, pk=affix_id)
+    context = {'header_tab': 'affixes',
+               'affix': prefix,
+               }
+    return render(request, 'web/affix.html', context)
+
+def suffix(request, affix_id):
+    suffix = get_object_or_404(ItemSuffix, pk=affix_id)
+    context = {'header_tab': 'affixes',
+               'affix': suffix,
+               }
+    return render(request, 'web/affix.html', context)
 
 def affixlist(request):
     prefixgroup_list = ItemPrefixGroup.objects.all()

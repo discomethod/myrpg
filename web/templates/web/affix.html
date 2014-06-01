@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ item }}
+{% endblock %}
+
+{% block content %}
+{% autoescape off %}
+{% if item %}
+   <h3 class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</h3>
+   {% if item.base and item.base != item %}
+     <br />(based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a>)
+   {% endif %}
+   {% if item.modification %}
+     <br/>Base:
+   {% endif %}
+   {% for modification in item.modification.all %}
+     <br />{{ modification }}
+   {% endfor %}
+   {% for prefix in item.prefixes.all %}
+     <br /><strong>{{ prefix }}</strong> prefix:
+     {% for modification in prefix.modifications.all %}
+       <br />{{ modification }}
+     {% endfor %}
+   {% endfor %}
+   {% for suffix in item.suffixes.all %}
+     <br /><strong>{{ suffix }}</strong> suffix:
+     {% for modification in suffix.modifications.all %}
+       <br />{{ modification }}
+     {% endfor %}
+   {% endfor %}
+{% else %}
+    <p>No item to see here.</p>
+{% endif %}
+{% endautoescape %}
+{% endblock %}
+
