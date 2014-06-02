@@ -6,6 +6,8 @@ Page Not Found
 
 {% block content %}
 {% autoescape off %}
+<h1>Error Four Oh Four</h1>
 We couldn't find the page you're looking for.
+<br />Click <a href="{{ request.META.HTTP_REFERER }}">here</a> to go back to the page you were just on, and try again. 
 {% endautoescape %}
 {% endblock %}

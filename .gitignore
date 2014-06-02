@@ -1,3 +1,12 @@
+manage.py
+__init__.py
+myrpg/settings.py
+myrpg/wsgi.py
+static/admin/
+static/css/bootstrap.css
+static/django_extensions/
+web/migrations/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

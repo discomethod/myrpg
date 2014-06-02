@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ affixgroup }}
+{% endblock %}
+
+{% block content %}
+{% autoescape off %}
+{% if affixes %}
+<h3>{% if affixgroup.prefix %}prefix{% else %}suffix{% endif %} group: {{ affixgroup }}</h3>
+  <ul>
+  {% for affix in affixes %}
+    <li><a href="{% url 'affix' affix.pk %}">{{ affix }}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>This affix group has no affixes.</p>
+{% endif %}
+{% endautoescape %}
+{% endblock %}
