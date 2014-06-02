@@ -135,17 +135,16 @@ class Character(models.Model):
     
     modification = models.ManyToManyField(Modifier)
     
-class ItemPrefixGroup(models.Model):
+class ItemAffixGroup(models.Model):
     name = models.CharField(max_length=64)
+    prefix = models.BooleanField(default=True)
     def __unicode__( self ):
         return self.name
 
-class ItemSuffixGroup(models.Model):
+class ItemAffix(models.Model):
     name = models.CharField(max_length=64)
-    def __unicode__( self ):
-        return self.name
-
-class ItemFix(models.Model):
+    group = models.ForeignKey('ItemAffixGroup')
+    prefix = models.BooleanField(default=True)
     modifications = models.ManyToManyField(Modifier, blank=True)
     ilevel = models.IntegerField(default=0)
     def __unicode__( self ):
@@ -156,28 +155,13 @@ class ItemFix(models.Model):
             result += str(modification) + ", "
         result = result[:-2]
         return result
-    class Meta:
-        abstract = True
-
-class ItemPrefix(ItemFix):
-    name = models.CharField(max_length=64)
-    group = models.ForeignKey('ItemPrefixGroup')
-    def __unicode__(self):
-        return self.name
-
-class ItemSuffix(ItemFix):
-    name = models.CharField(max_length=64)
-    group = models.ForeignKey('ItemSuffixGroup')
-    def __unicode__(self):
-        return self.name
 
 class Item(models.Model):
     name = models.CharField(max_length=64)
     ilevel = models.IntegerField(default=0)
     itype = models.ForeignKey('ItemType') # an item has exactly one item type
     base = models.ForeignKey('self', blank=True, null=True) # an item may or may not be based on another item
-    prefixes = models.ManyToManyField(ItemPrefix,blank=True) # possible to have no prefixes
-    suffixes = models.ManyToManyField(ItemSuffix, blank=True) # possible to have no suffixes
+    affixes = models.ManyToManyField(ItemAffix, blank=True) # possible to have zero or more affixes
     slots = models.ManyToManyField(ItemSlot, blank=True) # an item can occupy multiple slots, or no slot
     modification = models.ManyToManyField(Modifier, blank=True) # an item can have no modifications
     RARITIES = ['Common', 'Uncommon', 'Rare','Epic',]

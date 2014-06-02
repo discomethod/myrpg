@@ -17,15 +17,10 @@
    {% for modification in item.modification.all %}
      <br />{{ modification }}
    {% endfor %}
-   {% for prefix in item.prefixes.all %}
-     <br /><strong>{{ prefix }}</strong> prefix:
-     {% for modification in prefix.modifications.all %}
-       <br />{{ modification }}
-     {% endfor %}
-   {% endfor %}
-   {% for suffix in item.suffixes.all %}
-     <br /><strong>{{ suffix }}</strong> suffix:
-     {% for modification in suffix.modifications.all %}
+
+   {% for affix in item_affixes %}
+     <br /><strong>{{ affix }}</strong> {% if affix.prefix %}prefix{% else %}suffix{% endif %}:
+     {% for modification in affix.modifications.all %}
        <br />{{ modification }}
      {% endfor %}
    {% endfor %}
