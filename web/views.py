@@ -105,8 +105,8 @@ def itemgen(request):
         return render(request, 'web/itemgen.html', context)
     else:
         # define some characteristics of generating prefix/suffixes
-        CORE_PREFIX_MAX = 3 # absolute maximum number of prefixes
-        CORE_SUFFIX_MAX = 3 # absolute maximum number of suffixes
+        CORE_PREFIX_MAX = 2 # absolute maximum number of prefixes
+        CORE_SUFFIX_MAX = 2 # absolute maximum number of suffixes
         CORE_FIXES_FROM_AFFIXGROUP = 3 # how many of the top affixes to pick from each fixgroup
         CORE_AFFIX_DISCREPANCY = 1 # maxmimum difference between number of fixes
         # we now have a base item to work with
@@ -241,6 +241,9 @@ def itemlist(request):
 def item(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
     item_affixes = item.affixes.order_by('-prefix')
+    if (not item.description) and item.base and item.base.description:
+        # if this item is a generated item with no description, use the description of the base item
+        item.description = item.base.description + " There's something different about it thought."
     context = {'header_tab': 'items',
                 'item': item,
                 'item_affixes': item_affixes,}
