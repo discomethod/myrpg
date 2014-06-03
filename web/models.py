@@ -3,7 +3,7 @@ from django.db import models
 # Game definitions
 
 """
-ATTRIBUTES:
+PRIMARY_ATTRIBUTES:
     Strength        Vitality
     Dexterity       Charisma
     Intelligence    Wisdom
@@ -36,6 +36,8 @@ class ItemSlot(models.Model):
     name = models.CharField(max_length=64)
     def __unicode__( self ):
         return self.name
+    class Meta:
+        verbose_name = "item slot"
 
 """
 ITEM TYPES:
@@ -53,16 +55,41 @@ ITEM TYPES:
 class ItemType(models.Model):
     name = models.CharField(max_length=64)
     raresuffixes = models.ManyToManyField('ItemRareSuffix', blank=True)
+    equippable = models.BooleanField(default=False)
     def __unicode__( self ):
         return self.name
+    def is_equippable(self):
+        return self.equippable
+    is_equippable.boolean = True
+    is_equippable.short_description = 'Equippable?'
+    class Meta:
+        verbose_name = "item type"
 
 class ItemRarePrefix(models.Model):
     name = models.CharField(max_length=64)
     def __unicode__(self):
         return self.name
+    class Meta:
+        verbose_name = "rare item prefix"
+        verbose_name_plural = "rare item prefixes"
 
 class ItemRareSuffix(models.Model):
     name = models.CharField(max_length=64)
+    def __unicode__(self):
+        return self.name
+    class Meta:
+        verbose_name = "rare item suffix"
+        verbose_name_plural = "rare item suffixes"
+
+class Modifiable(models.Model):
+    name = models.CharField(max_length=64)
+    # type of modifiable
+    TYPE_CHOICES = []
+    TYPES = ['Primary Attribute', 'Secondary Attribute', 'Damage Type', 'Attack Type',]
+    offensive = models.BooleanField(default=True)
+    for TYPE in TYPES:
+        TYPE_CHOICES.append((TYPE[:3].upper(),TYPE))
+    type = models.CharField(max_length=3, choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
     def __unicode__(self):
         return self.name
 
@@ -70,13 +97,11 @@ class ItemRareSuffix(models.Model):
 
 class Modifier(models.Model):
     # choice of attribute
-    ATTRIBUTES = ['Strength', 'Dexterity', 'Intelligence', 'Vitality', 'Charisma', 'Wisdom', ]
+    PRIMARY_ATTRIBUTES = ['Strength', 'Dexterity', 'Intelligence', 'Vitality', 'Charisma', 'Wisdom', ]
+    SECONDARY_ATTRIBUTES = ['Health', 'Mana', 'Energy', 'Fury', 'Initiative', 'Actions',]
     ELEMENTS = ['Physical Damage', 'Spell Damage', 'Shadow Damage', 'Arcane Damage', 'Lightning Damage', 'Poison Damage', 'Fire Damage', 'Ice Damage', 'Psychic Damage', 'Chaos Damage', ]
-    MODIFIABLE_CHOICES = []
-    MODIFIABLES = ATTRIBUTES + ELEMENTS
-    for MODIFIABLE in MODIFIABLES:
-        MODIFIABLE_CHOICES.append((MODIFIABLE[:3].upper(),MODIFIABLE))
-    modifiable = models.CharField(max_length=3, choices=MODIFIABLE_CHOICES, default=MODIFIABLE_CHOICES[0][0])
+    ATTACKS = ['Melee Attack', 'Ranged Attack', 'Social Attack', 'Magic Attack', 'Curse Attack', ]
+    modifies = models.ForeignKey(Modifiable, blank=True, null=True)
     
     # choice of dependency
     DEPENDENCIES = ['None', 'CharacterLevel', 'SkillLevel','ItemLevel',]
@@ -84,6 +109,11 @@ class Modifier(models.Model):
     for DEPENDENCY in DEPENDENCIES:
         DEPENDENCY_CHOICES.append((DEPENDENCY[:3].upper(),DEPENDENCY))
     dependency = models.CharField(max_length=3, choices=DEPENDENCY_CHOICES, default=DEPENDENCY_CHOICES[0][0])
+    
+    # would this modification be considered a BONUS or a MALUS?
+    # if it's a good thing, beneficial = True
+    # if it's a bad thing, beneficial = False
+    beneficial = models.BooleanField(default=True)
     
     # description of modification
     flat_min = models.IntegerField(default=0)
@@ -120,10 +150,43 @@ class Modifier(models.Model):
                     description += " increased"
                 else:
                     discription += " decreased"
-        description += " " + self.get_modifiable_display().lower()
+        description += " " + str(self.modifies).lower()
+        if self.modifies:
+            if self.modifies.type=="DAM":
+                # modifying a damage type
+                if self.modifies.offensive:
+                    description += " damage"
+                else:
+                    description += " resistance"
+            elif self.modifies.type=="ATT":
+                # modifying an attack type
+                if self.modifies.offensive:
+                    description += " attack"
+                else:
+                    description += " defense"
         return description
     
 # Advanced models
+
+class CharacterClass(models.Model):
+    name = models.CharField(max_length=64)
+    description = models.TextField(blank=True)
+    base = models.ForeignKey('self', blank=True, null=True)
+    modification = models.ManyToManyField(Modifier, blank=True) # a class can have no modifications
+    def __unicode__(self):
+        return self.name
+    class Meta:
+        verbose_name = "character class"
+        verbose_name_plural = "character classes"
+
+class CharacterRace(models.Model):
+    name = models.CharField(max_length=64)
+    description = models.TextField(blank=True)
+    modification = models.ManyToManyField(Modifier, blank=True) # a race can have no modifications
+    def __unicode__(self):
+        return self.name
+    class Meta:
+        verbose_name = "character race"
 
 class Character(models.Model):
     # character name
@@ -132,18 +195,26 @@ class Character(models.Model):
     level = models.IntegerField(default=1)
     # character experience
     experience = models.IntegerField(default=0)
+    # character class
+    character_class = models.ForeignKey(CharacterClass, blank=True, null=True)
+    # character race
+    character_race = models.ForeignKey(CharacterRace, blank=True, null=True)
     
     modification = models.ManyToManyField(Modifier)
     
 class ItemAffixGroup(models.Model):
     name = models.CharField(max_length=64)
+    description = models.TextField(blank=True)
     prefix = models.BooleanField(default=True)
     def __unicode__( self ):
         return self.name
+    class Meta:
+        verbose_name = "item affix group"
 
 class ItemAffix(models.Model):
     name = models.CharField(max_length=64)
-    group = models.ForeignKey('ItemAffixGroup')
+    description = models.TextField(blank=True)
+    group = models.ForeignKey(ItemAffixGroup)
     prefix = models.BooleanField(default=True)
     modifications = models.ManyToManyField(Modifier, blank=True)
     ilevel = models.IntegerField(default=0)
@@ -155,11 +226,15 @@ class ItemAffix(models.Model):
             result += str(modification) + ", "
         result = result[:-2]
         return result
+    class Meta:
+        verbose_name = "item affix"
+        verbose_name_plural = "item affixes"
 
 class Item(models.Model):
     name = models.CharField(max_length=64)
+    description = models.TextField(blank=True)
     ilevel = models.IntegerField(default=0)
-    itype = models.ForeignKey('ItemType') # an item has exactly one item type
+    itype = models.ForeignKey(ItemType) # an item has exactly one item type
     base = models.ForeignKey('self', blank=True, null=True) # an item may or may not be based on another item
     affixes = models.ManyToManyField(ItemAffix, blank=True) # possible to have zero or more affixes
     slots = models.ManyToManyField(ItemSlot, blank=True) # an item can occupy multiple slots, or no slot
@@ -176,3 +251,15 @@ class Item(models.Model):
     is_base.admin_order_field = 'base'
     is_base.boolean = True
     is_base.short_description = 'Base Item'
+
+class Skill(models.Model):
+    name = models.CharField(max_length=64)
+    description = models.TextField(blank=True)
+    classes = models.ManyToManyField(CharacterClass, blank=True) # which classes can use this skill
+    attack_type = models.ForeignKey(Modifiable, related_name='attack_type', default=lambda: Modifiable.objects.filter(type="ATT")[0])
+    success_roll_primary = models.ForeignKey(Modifiable, related_name='success_roll_primary')
+    success_roll_secondary = models.ForeignKey(Modifiable, related_name='success_roll_secondary')
+    effect_roll_primary = models.ForeignKey(Modifiable, related_name='effect_roll_primary')
+    effect_roll_secondary = models.ForeignKey(Modifiable, related_name='effect_roll_secondary')
+    def __unicode__( self ):
+        return self.name
