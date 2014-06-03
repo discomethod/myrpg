@@ -12,16 +12,15 @@
       <div class="panel panel-default">
         <div class="panel-heading"><h3 class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</h3></div>
         <div class="panel-body">
-          <h4>item level {{ item.ilevel }}
-          {% if item.base and item.base != item %}
-           (<em>based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a></em>)
-          {% endif %}
-          </h4>
+          <h4>level {{ item.ilevel }} <strong class="text-item-{{ item.get_rarity_display.lower }}">{{ item.get_rarity_display.lower }} {{ item.itype.name.lower }}</strong></h4>
           {% if item.description %}
-          <div class="well">{{ item.description }}</div>
+          <div class="well"><em class="text-item-{{ item.get_rarity_display.lower }}">{{ item.description }}</em></div>
           {% endif %}
         </div>
         <ul class="list-group">
+          {% if item.base and item.base != item %}
+           <li class="list-group-item"><em>based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a></em></li>
+          {% endif %}
           {% if item.modification %}
             {% for modification in item.modification.all %}
               <li class="list-group-item">{{ modification }}</li>
