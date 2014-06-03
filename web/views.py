@@ -244,7 +244,7 @@ def item(request, item_id):
     item_affixes = item.affixes.order_by('-prefix')
     if (not item.description) and item.base and item.base.description:
         # if this item is a generated item with no description, use the description of the base item
-        item.description = item.base.description + " There's something different about it thought."
+        item.description = item.base.description + " There's something different about this " + str(item.base) + " though."
     context = {'header_tab': 'items',
                 'item': item,
                 'item_affixes': item_affixes,}
