@@ -32,7 +32,7 @@ def affixgroup(request, affixgroup_id):
     return render(request, 'web/affixgroup.html', context)
 
 def affixlist(request):
-    affixgroup_list = ItemAffixGroup.objects.order_by('-prefix','name')
+    affixgroup_list = ItemAffixGroup.objects.order_by('-prefix','name').annotate(affixes=Count('itemaffix'))
     context = {'header_tab': 'affixes',
                'affixgroup_list': affixgroup_list,
                }
@@ -185,6 +185,7 @@ def itemgen(request):
                             # add base item relationship
                             new_item.base = base_item
                             new_item.name="NEWITEM"
+                            new_item.description=""
                             new_item.save()
                             # copy slots from base item
                             for slot in base_item.slots.all():
@@ -233,7 +234,7 @@ def itemgen(request):
         return render(request, 'web/itemgen.html', context)
 
 def itemlist(request):
-    item_list = Item.objects.annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-ilevel','-affix_sum','name')
+    item_list = Item.objects.annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
     context = {'header_tab': 'items',
                 'item_list': item_list}
     return render(request, 'web/itemlist.html', context)
