@@ -8,8 +8,13 @@
 {% autoescape off %}
 {% if item %}
    <h3 class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</h3>
+   <h4>item level {{ item.ilevel }}
    {% if item.base and item.base != item %}
-     <br />(based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a>)
+     (based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a>)
+   {% endif %}
+   </h4>
+   {% if item.description %}
+   <div class="well well-sm">{{ item.description }}</div>
    {% endif %}
    {% if item.modification %}
      <br/>Base:

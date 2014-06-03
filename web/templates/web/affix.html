@@ -7,7 +7,8 @@
 {% block content %}
 {% autoescape off %}
 <h3>{% if affix.prefix %}prefix{% else %}suffix{% endif %}: {{ affix }}</h3>
-<h4>in {% if affix.prefix %}prefix{% else %}suffix{% endif %} group: <a href="{% url 'affixgroup' affix.group.pk %}">{{ affix.group }}</a></h4>
+<h4>item level {{ affix.ilevel }}</h4>
+<em>in {% if affix.prefix %}prefix{% else %}suffix{% endif %} group: <a href="{% url 'affixgroup' affix.group.pk %}">{{ affix.group }}</a></em>
 {% for modification in affix.modifications.all %}
   <br />{{ modification }}
 {% endfor %}
