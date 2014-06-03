@@ -164,7 +164,7 @@ class Modifier(models.Model):
                     description += " attack"
                 else:
                     description += " defense"
-        return description
+        return unicode(description)
     
 # Advanced models
 
