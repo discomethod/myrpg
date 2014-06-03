@@ -1,3 +1,6 @@
+body {
+  font-family: Helvetica, Arial, sans-serif;
+}
 a:hover {
   text-decoration: none;
 }
@@ -20,8 +23,8 @@ a.text-item-rare:hover {
   color: #E6A200;
 }
 .text-item-epic {
-  color: #4C2982;
+  color: #704DA6;
 }
 a.text-item-epic:hover {
-  color: #331069;
+  color: #4C2982;
 }
