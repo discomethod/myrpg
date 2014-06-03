@@ -6,14 +6,21 @@ All Affixes
 
 {% block content %}
 {% if affixgroup_list %}
-  <ul>
-  {% for affixgroup in affixgroup_list %}
-    {% ifchanged affixgroup.prefix %}
-    <h3>{% if affixgroup.prefix %}Prefix{% else %}Suffix{% endif %} Groups</h3>
-    {% endifchanged %}
-    <li><a href="{% url 'affixgroup' affixgroup.pk %}">{{ affixgroup }}</a></li>
-  {% endfor %}
-  </ul>
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <ul class="list-group">
+      {% for affixgroup in affixgroup_list %}
+        {% ifchanged affixgroup.prefix %}
+        <h3>{% if affixgroup.prefix %}Prefix{% else %}Suffix{% endif %} Groups</h3>
+        {% endifchanged %}
+        <li class="list-group-item">
+          <span class="badge">{{ affixgroup.affixes }}</span>
+          <a href="{% url 'affixgroup' affixgroup.pk %}">{{ affixgroup }}</a>
+        </li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
 {% else %}
   <p>No items to see here.</p>
 {% endif %}

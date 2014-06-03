@@ -7,14 +7,20 @@ All Items
 {% block content %}
 {% autoescape off %}
 {% if item_list %}
-  <ul>
-  {% for item in item_list %}
-    {% ifchanged item.itype %}
-    <h3>{{ item.itype }}</h3>
-    {% endifchanged %}
-    <li><a href="{% url 'item' item.id %}" class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</a></li>
-  {% endfor %}
-  </ul>
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <ul>
+      {% for item in item_list %}
+        {% ifchanged item.itype %}
+        </ul>
+        <h3>{{ item.itype }}</h3>
+        <ul class="list-group">
+        {% endifchanged %}
+        <li class="list-group-item"><a href="{% url 'item' item.id %}" class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</a></li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
 {% else %}
   <p>No items to see here.</p>
 {% endif %}

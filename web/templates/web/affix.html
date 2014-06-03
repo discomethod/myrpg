@@ -6,12 +6,24 @@
 
 {% block content %}
 {% autoescape off %}
-<h3>{% if affix.prefix %}prefix{% else %}suffix{% endif %}: {{ affix }}</h3>
-<h4>item level {{ affix.ilevel }}</h4>
-<em>in {% if affix.prefix %}prefix{% else %}suffix{% endif %} group: <a href="{% url 'affixgroup' affix.group.pk %}">{{ affix.group }}</a></em>
-{% for modification in affix.modifications.all %}
-  <br />{{ modification }}
-{% endfor %}
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">{% if affix.prefix %}prefix{% else %}suffix{% endif %}: {{ affix }}</div>
+        <div class="panel-body">
+          item level {{ affix.ilevel }}
+          <br /><em>in {% if affix.prefix %}prefix{% else %}suffix{% endif %} group: <a href="{% url 'affixgroup' affix.group.pk %}">{{ affix.group }}</a></em>
+        </div>
+        {% if affix.modifications.all %}
+          <ul class="list-group">
+          {% for modification in affix.modifications.all %}
+            <li class="list-group-item">{{ modification }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 {% endautoescape %}
 {% endblock %}
 
