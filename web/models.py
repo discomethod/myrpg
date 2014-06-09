@@ -86,34 +86,56 @@ class Modifiable(models.Model):
     # type of modifiable
     TYPE_CHOICES = []
     TYPES = ['Primary Attribute', 'Secondary Attribute', 'Damage Type', 'Attack Type',]
-    offensive = models.BooleanField(default=True)
     for TYPE in TYPES:
-        TYPE_CHOICES.append((TYPE[:3].upper(),TYPE))
-    type = models.CharField(max_length=3, choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
+        TYPE_CHOICES.append((TYPE[:5].upper(),TYPE))
+    type = models.CharField(max_length=5, choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
     def __unicode__(self):
         return self.name
+
+def calculate_net_modifiables(modifiers=None, characterlevel=1, skilllevel=1, itemlevel=1):
+    # assume basic default values for each of the parameters:
+    # modifiers = no modifiers
+    # if no character/skill/item level is given,
+    #   assume our modifiers aren't being used by a character, or with a skill/item
+    #   therefore, display dependence on those values
+        if modifiers == None:
+            # no modifiers were passed in
+            return None
+        else:
+            # modifiers is a list of Modifier objects
+            net_modifiables = dict()
+            modifiables_list = Modifiable.objects.all()
+            for modifiable in modifiables_list:
+                net_modifiables[str(modifiable).lower+"_min"] = 0
+                net_modifiables[str(modifiable).lower+"_max"] = 0
+            
+            modifiers_percentage_based = list()
+            for modifier in modifiers:
+                # process each individual modifier
+                # start with flat values
+                pass
 
 # Core models
 
 class Modifier(models.Model):
     # choice of attribute
-    PRIMARY_ATTRIBUTES = ['Strength', 'Dexterity', 'Intelligence', 'Vitality', 'Charisma', 'Wisdom', ]
-    SECONDARY_ATTRIBUTES = ['Health', 'Mana', 'Energy', 'Fury', 'Initiative', 'Actions',]
-    ELEMENTS = ['Physical Damage', 'Spell Damage', 'Shadow Damage', 'Arcane Damage', 'Lightning Damage', 'Poison Damage', 'Fire Damage', 'Ice Damage', 'Psychic Damage', 'Chaos Damage', ]
-    ATTACKS = ['Melee Attack', 'Ranged Attack', 'Social Attack', 'Magic Attack', 'Curse Attack', ]
     modifies = models.ForeignKey(Modifiable, blank=True, null=True)
     
     # choice of dependency
     DEPENDENCIES = ['None', 'CharacterLevel', 'SkillLevel','ItemLevel',]
     DEPENDENCY_CHOICES = []
     for DEPENDENCY in DEPENDENCIES:
-        DEPENDENCY_CHOICES.append((DEPENDENCY[:3].upper(),DEPENDENCY))
-    dependency = models.CharField(max_length=3, choices=DEPENDENCY_CHOICES, default=DEPENDENCY_CHOICES[0][0])
+        DEPENDENCY_CHOICES.append((DEPENDENCY[:5].upper(),DEPENDENCY))
+    dependency = models.CharField(max_length=5, choices=DEPENDENCY_CHOICES, default=DEPENDENCY_CHOICES[0][0])
     
     # would this modification be considered a BONUS or a MALUS?
     # if it's a good thing, beneficial = True
     # if it's a bad thing, beneficial = False
     beneficial = models.BooleanField(default=True)
+    
+    # is this mod for offensive rolls?
+    # e.g. lightning damage defensive would be lightning resistance
+    offensive = models.BooleanField(default=True)
     
     # description of modification
     flat_min = models.IntegerField(default=0)
@@ -152,20 +174,28 @@ class Modifier(models.Model):
                     discription += " decreased"
         description += " " + str(self.modifies).lower()
         if self.modifies:
-            if self.modifies.type=="DAM":
+            if self.modifies.type=="DAMAG":
                 # modifying a damage type
-                if self.modifies.offensive:
+                if self.offensive:
                     description += " damage"
                 else:
                     description += " resistance"
-            elif self.modifies.type=="ATT":
+            elif self.modifies.type=="ATTAC":
                 # modifying an attack type
-                if self.modifies.offensive:
+                if self.offensive:
                     description += " attack"
                 else:
                     description += " defense"
         return unicode(description)
-    
+    def is_beneficial(self):
+        return self.beneficial
+    is_beneficial.boolean = True
+    is_beneficial.short_description = "Beneficial?"
+    def is_offensive(self):
+        return self.offensive
+    is_offensive.boolean = True
+    is_offensive.short_description = "Beneficial?"
+
 # Advanced models
 
 class CharacterClass(models.Model):
@@ -242,8 +272,8 @@ class Item(models.Model):
     RARITIES = ['Common', 'Uncommon', 'Rare','Epic',]
     RARITY_CHOICES = []
     for RARITY in RARITIES:
-        RARITY_CHOICES.append((RARITY[:3].upper(),RARITY))
-    rarity = models.CharField(max_length=3, choices=RARITY_CHOICES, default=RARITY_CHOICES[0][0])
+        RARITY_CHOICES.append((RARITY[:5].upper(),RARITY))
+    rarity = models.CharField(max_length=5, choices=RARITY_CHOICES, default=RARITY_CHOICES[0][0])
     def __unicode__( self ):
         return self.name
     def is_base(self):

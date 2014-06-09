@@ -14,6 +14,9 @@ class ItemAffixAdmin(admin.ModelAdmin):
     list_display = ('name','get_modifications_display','group')
     list_filter = ['group']
 
+class ModifierAdmin(admin.ModelAdmin):
+    list_display = ('__unicode__', 'is_offensive', 'is_beneficial')
+
 class ModifiableAdmin(admin.ModelAdmin):
     list_display = ('name', 'type')
     list_filter = ['type']
@@ -30,5 +33,5 @@ admin.site.register(ItemSlot)
 admin.site.register(ItemAffix, ItemAffixAdmin)
 admin.site.register(ItemAffixGroup)
 
-admin.site.register(Modifier)
+admin.site.register(Modifier, ModifierAdmin)
 admin.site.register(Modifiable, ModifiableAdmin)

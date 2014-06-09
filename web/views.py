@@ -198,12 +198,12 @@ def itemgen(request):
                                 new_item.affixes.add(affix)
                             # generate the new item's rarity
                             if len(suffix_list) > 1:
-                                new_item.rarity = "RAR"
+                                new_item.rarity = "RARE"
                             else:
-                                new_item.rarity = "UNC"
+                                new_item.rarity = "UNCOM"
                             
                             # generate this item's name
-                            if new_item.rarity == "UNC":
+                            if new_item.rarity == "UNCOM":
                                 new_item.name = base_item.name
                                 # just prepend prefix and append suffix
                                 for prefix in prefix_list:
