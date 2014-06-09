@@ -137,6 +137,10 @@ class Modifier(models.Model):
     # e.g. lightning damage defensive would be lightning resistance
     offensive = models.BooleanField(default=True)
     
+    # does this mod affect local or global properties?
+    # usually for percentage modifiers of armor, damage, etc.
+    local = models.BooleanField(default=True)
+
     # description of modification
     flat_min = models.IntegerField(default=0)
     flat_max = models.IntegerField(default=0)
@@ -172,6 +176,7 @@ class Modifier(models.Model):
                     description += " increased"
                 else:
                     discription += " decreased"
+            description += " " + ("local" if self.local else "global")
         description += " " + str(self.modifies).lower()
         if self.modifies:
             if self.modifies.type=="DAMAG":

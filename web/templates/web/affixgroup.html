@@ -10,7 +10,7 @@
   <div class="row">
     <div class="col-md-4 col-md-offset-4">
       <div class="panel panel-default">
-        <div class="panel-heading"><h4>{% if affixgroup.prefix %}prefixes{% else %}suffixs{% endif %}: {{ affixgroup }}</h4></div>
+        <div class="panel-heading"><h4>{% if affixgroup.prefix %}prefix{% else %}suffix{% endif %}es: {{ affixgroup }}</h4></div>
         {% if affixgroup.description %}
         <div class="panel-body">
           <em>{{ affixgroup.description }}</em>
@@ -19,7 +19,7 @@
         <ul class="list-group">
         
         {% for affix in affixes %}
-          <li class="list-group-item"><a href="{% url 'affix' affix.pk %}">{{ affix }}</a></li>
+          <li class="list-group-item"><a href="{% url 'affix' affix.pk %}">{{ affix }}</a><span class="pull-right">(<em>level {{ affix.ilevel }})</em></span></li>
         {% endfor %}
         </ul>
       </div>

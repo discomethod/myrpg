@@ -17,8 +17,10 @@ def index(request):
 
 def affix(request, affix_id):
     affix = get_object_or_404(ItemAffix, pk=affix_id)
+    foundon = Item.objects.filter(affixes=affix).annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
     context = {'header_tab': 'affixes',
                'affix': affix,
+               'foundon': foundon,
                }
     return render(request, 'web/affix.html', context)
 

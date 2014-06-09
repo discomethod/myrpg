@@ -24,6 +24,27 @@
       </div>
     </div>
   </div>
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4>items:</h4></div>
+        {% if foundon %}
+        <div class="panel-body">
+          This {% if affix.prefix %}prefix{% else %}suffix{% endif %} appears on the following items:
+        </div>
+        <ul class="list-group">
+        {% for item in foundon %}
+          <li class="list-group-item"><a href="{% url 'item' item.pk %}" class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</a><span class="pull-right">(<em>level {{ item.ilevel }})</em></span></li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        <div class="panel-body">
+          This {% if affix.prefix %}prefix{% else %}suffix{% endif %} is not available on any item yet.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 {% endautoescape %}
 {% endblock %}
 
