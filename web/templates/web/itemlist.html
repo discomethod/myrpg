@@ -9,16 +9,16 @@ All Items
 {% if item_list %}
   <div class="row">
     <div class="col-md-4 col-md-offset-4">
-      <ul>
-      {% for item in item_list %}
-        {% ifchanged item.itype %}
-        </ul>
-        <h3>{{ item.itype }}</h3>
-        <ul class="list-group">
-        {% endifchanged %}
-        <li class="list-group-item"><a href="{% url 'item' item.id %}" class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</a></li>
-      {% endfor %}
-      </ul>
+    {% for item_type_list in item_list %}
+      <div class="panel panel-default">
+        <div class="panel-heading"><h4>{{ item_type_list.0.itype|lower }}</h4></div>
+          <ul class="list-group">
+          {% for item in item_type_list %}
+            <li class="list-group-item"><a href="{% url 'item' item.id %}" class="text-item-{{ item.get_rarity_display.lower }}">{{ item }}</a></li>
+          {% endfor %}
+          </ul>
+      </div>
+    {% endfor %}
     </div>
   </div>
 {% else %}

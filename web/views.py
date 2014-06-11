@@ -236,7 +236,20 @@ def itemgen(request):
         return render(request, 'web/itemgen.html', context)
 
 def itemlist(request):
-    item_list = Item.objects.annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
+    raw_item_list = Item.objects.annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
+    item_list = list()
+    current_sublist = list()
+    last_item_type = None
+    for raw_item in raw_item_list:
+        if raw_item.itype != last_item_type:
+            # new item type
+            if len(current_sublist)>0:
+                item_list.append(current_sublist)
+            current_sublist = list()
+            last_item_type = raw_item.itype
+        current_sublist.append(raw_item)
+    if len(current_sublist)>0:
+        item_list.append(current_sublist)
     context = {'header_tab': 'items',
                 'item_list': item_list}
     return render(request, 'web/itemlist.html', context)
