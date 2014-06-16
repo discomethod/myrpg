@@ -92,41 +92,60 @@ class Modifiable(models.Model):
     def __unicode__(self):
         return self.name
 
-def calculate_net_modifiables(modifiers=None, characterlevel=1, skilllevel=1, itemlevel=1):
+def calculate_net_modifiables(modifiers=None, characterlevel=None, itemlevel=None):
     # assume basic default values for each of the parameters:
     # modifiers = no modifiers
     # if no character/skill/item level is given,
-    #   assume our modifiers aren't being used by a character, or with a skill/item
+    #   assume our modifiers aren't being used by a character, or with an item
     #   therefore, display dependence on those values
-        if modifiers == None:
-            # no modifiers were passed in
-            return None
-        else:
-            # modifiers is a list of Modifier objects
-            net_modifiables = dict()
-            modifiables_list = Modifiable.objects.all()
-            for modifiable in modifiables_list:
-                net_modifiables[str(modifiable).lower+"_min"] = 0
-                net_modifiables[str(modifiable).lower+"_max"] = 0
-            
-            modifiers_percentage_based = list()
-            for modifier in modifiers:
-                # process each individual modifier
-                # start with flat values
-                pass
+    if modifiers == None:
+        # no modifiers were passed in
+        return None
+    else:
+        # modifiers is a list of Modifier objects
+        net_modifiables = dict()
+        local_percentage = dict()
+        modifiables_list = Modifiable.objects.all()
+        for modifiable in modifiables_list:
+            for combat_type in ("offensive","defensive",):
+                net_modifiables[str(modifiable).lower()+"_"+combat_type+"_min"] = 0
+                net_modifiables[str(modifiable).lower()+"_"+combat_type+"_max"] = 0
+                # store the global percentage modifiers
+                # local modifiers will be baked into the flat values
+                net_modifiables[str(modifiable).lower()+"_"+combat_type+"_percentage"] = 0
+                local_percentage[str(modifiable).lower()+"_"+combat_type] = 0 # list of local percentage modifiers
+        
+        for modifier in modifiers:
+            # process each individual modifier
+            # construct the modifiable_name, e.g. psychic_offensive_min, or arcane_defensive_max
+            modifiable_name = str(modifier.modifies).lower()
+            if modifier.offensive:
+                modifiable_name += "_offensive"
+            else:
+                modifiable_name += "_defensive"
+            # process flat modifiers
+            net_modifiables[modifiable_name+"_min"] += modifier.flat_min
+            net_modifiables[modifiable_name+"_max"] += modifier.flat_max
+            # process percentage modifiers
+            if modifier.local:
+                local_percentage[modifiable_name] += modifier.percentage
+            else:
+                net_modifiables[modifiable_name+"_percentage"] += modifier.percentage
+
+        # calculate the effects of local modifiers
+        for modifiable in modifiables_list:
+            for combat_type in ("offensive","defensive",):
+                modifiable_name = str(modifiable).lower() + "_" + combat_type
+                net_modifiables[modifiable_name+"_min"] = round(net_modifiables[modifiable_name+"_min"] * (1.0 + local_percentage[modifiable_name]/100.0))
+                net_modifiables[modifiable_name+"_max"] = round(net_modifiables[modifiable_name+"_max"] * (1.0 + local_percentage[modifiable_name]/100.0))
+        return net_modifiables
+
 
 # Core models
 
 class Modifier(models.Model):
     # choice of attribute
     modifies = models.ForeignKey(Modifiable, blank=True, null=True)
-    
-    # choice of dependency
-    DEPENDENCIES = ['None', 'CharacterLevel', 'SkillLevel','ItemLevel',]
-    DEPENDENCY_CHOICES = []
-    for DEPENDENCY in DEPENDENCIES:
-        DEPENDENCY_CHOICES.append((DEPENDENCY[:5].upper(),DEPENDENCY))
-    dependency = models.CharField(max_length=5, choices=DEPENDENCY_CHOICES, default=DEPENDENCY_CHOICES[0][0])
     
     # would this modification be considered a BONUS or a MALUS?
     # if it's a good thing, beneficial = True
@@ -149,7 +168,7 @@ class Modifier(models.Model):
     total_max = models.IntegerField(default=0)
     bound_lower = models.BooleanField(default=False)
     bound_upper = models.BooleanField(default=False)
-    
+
     def __unicode__( self ):
         # cook up string representation of this modifier
         description = ""
@@ -162,20 +181,11 @@ class Modifier(models.Model):
         if self.percentage != 0:
             if description != "":
                 description += ", "
-            if self.get_dependency_display()!='None':
-                description += "+"
-            description += str(abs(self.percentage)) + "%"
-            if self.get_dependency_display()=='CharacterLevel':
-                description += " of your level"
-            elif self.get_dependency_display()=='SkillLevel':
-                description += " of your skill level"
-            elif self.get_dependency_display()=='ItemLevel':
-                description += " of your item level"
-            elif self.get_dependency_display()=='None':
-                if self.percentage > 0:
-                    description += " increased"
-                else:
-                    discription += " decreased"
+            description += "+" + str(abs(self.percentage)) + "%"
+            if self.percentage > 0:
+                description += " increased"
+            else:
+                discription += " decreased"
             description += " " + ("local" if self.local else "global")
         description += " " + str(self.modifies).lower()
         if self.modifies:
@@ -255,6 +265,11 @@ class ItemAffix(models.Model):
     ilevel = models.IntegerField(default=0)
     def __unicode__( self ):
         return self.name
+    def call_calculate_net_modifiables(self):
+        modifiers_to_pass = list()
+        for modification in self.modifications:
+            modifiers_to_pass.append(modification)
+        return calculate_net_modifiables(modifiers_to_pass)
     def get_modifications_display(self):
         result = ""
         for modification in self.modifications.all():
@@ -291,7 +306,7 @@ class Skill(models.Model):
     name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
     classes = models.ManyToManyField(CharacterClass, blank=True) # which classes can use this skill
-    attack_type = models.ForeignKey(Modifiable, related_name='attack_type', default=lambda: Modifiable.objects.filter(type="ATT")[0])
+    attack_type = models.ForeignKey(Modifiable, related_name='attack_type', default=lambda: Modifiable.objects.filter(type="ATTAC")[0])
     success_roll_primary = models.ForeignKey(Modifiable, related_name='success_roll_primary')
     success_roll_secondary = models.ForeignKey(Modifiable, related_name='success_roll_secondary')
     effect_roll_primary = models.ForeignKey(Modifiable, related_name='effect_roll_primary')
