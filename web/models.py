@@ -266,11 +266,13 @@ class ItemAffix(models.Model):
     def __unicode__( self ):
         return self.name
     def call_calculate_net_modifiables(self):
+        # makes a call to calculate_net_modifiables with appropriate parameters for this affix scope
         modifiers_to_pass = list()
-        for modification in self.modifications:
+        for modification in self.modifications.all():
             modifiers_to_pass.append(modification)
         return calculate_net_modifiables(modifiers_to_pass)
     def get_modifications_display(self):
+        # returns a single-line human-friendly description of this affix's modifications
         result = ""
         for modification in self.modifications.all():
             result += str(modification) + ", "
