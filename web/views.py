@@ -36,8 +36,11 @@ def affixgroup(request, affixgroup_id):
 
 def affixlist(request):
     affixgroup_list = ItemAffixGroup.objects.order_by('-prefix','name').annotate(affixes=Count('itemaffix'))
+    prefixgroup_list = ItemAffixGroup.objects.filter(prefix=True).order_by('name').annotate(affixes=Count('itemaffix'))
+    suffixgroup_list = ItemAffixGroup.objects.filter(prefix=False).order_by('name').annotate(affixes=Count('itemaffix'))
     context = {'header_tab': 'affixes',
-               'affixgroup_list': affixgroup_list,
+               'prefixgroup_list': prefixgroup_list,
+               'suffixgroup_list': suffixgroup_list,
                }
     return render(request, 'web/affixlist.html', context)
 
