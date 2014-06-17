@@ -146,7 +146,7 @@ def get_net_modifiables(modifiers=None, characterlevel=None, itemlevel=None):
         return net_modifiables
 
 def trim_net_modifiables(net_modifiables):
-    """Parses a dictionary of net modifiables and returns a concise dictionary of non-zero net modifiables as dictionaries.
+    """Parses a dictionary of net modifiables and returns a list of non-zero net modifiables as dictionaries.
 
     The returned dictionary will not hold any unmodified attributes.
     """
