@@ -21,16 +21,11 @@
           {% if item.base and item.base != item %}
            <li class="list-group-item"><em>based on <a href="{% url 'item' item.base.pk %}" class="text-item-{{ item.base.get_rarity_display.lower }}">{{ item.base }}</a></em></li>
           {% endif %}
-          {% if item.modification %}
-            {% for modification in item.modification.all %}
-              <li class="list-group-item">{{ modification }}</li>
+          {% if display_modifiables_list %}
+            {% for display_modifiable in display_modifiables_list %}
+              <li class="list-group-item">{{ display_modifiable }}</li>
             {% endfor %}
           {% endif %}
-          {% for affix in item_affixes %}
-            {% for modification in affix.modifications.all %}
-              <li class="list-group-item">{{ modification }}</li>
-            {% endfor %}
-          {% endfor %}
         </ul>
       </div>
     </div>

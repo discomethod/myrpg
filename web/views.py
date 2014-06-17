@@ -9,6 +9,7 @@ from django.template import RequestContext, loader
 from django.utils.html import escape
 
 from web.models import Item, ItemAffix, ItemAffixGroup, ItemRarePrefix, ItemRareSuffix
+from web.models import trim_net_modifiables, display_net_modifiable
 
 # Create your views here.
 def index(request):
@@ -193,8 +194,8 @@ def itemgen(request):
                             for slot in base_item.slots.all():
                                 new_item.slots.add(slot)
                             # copy base modifications form base item
-                            for mod in base_item.modification.all():
-                                new_item.modification.add(mod)
+                            for mod in base_item.modifications.all():
+                                new_item.modifications.add(mod)
                             # add the new item's affixes
                             for affix in affix_list:
                                 new_item.affixes.add(affix)
@@ -256,11 +257,16 @@ def itemlist(request):
 
 def item(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
-    item_affixes = item.affixes.order_by('-prefix')
+    item_net_modifiables = trim_net_modifiables(item.call_get_net_modifiables())
+    item_net_modifiables.sort(key=lambda net_modifiable: net_modifiable['max'], reverse=True) # sorts net modifiables by their maximum value descending
+    display_modifiables_list = list() # list of strings to display
+    for item_net_modifiable in item_net_modifiables:
+        display_modifiables_list += display_net_modifiable(item_net_modifiable)
     if (not item.description) and item.base and item.base.description:
         # if this item is a generated item with no description, use the description of the base item
         item.description = item.base.description + " There's something different about this " + str(item.base) + " though."
     context = {'header_tab': 'items',
                 'item': item,
-                'item_affixes': item_affixes,}
+                'display_modifiables_list': display_modifiables_list,
+                }
     return render(request, 'web/item.html', context)
