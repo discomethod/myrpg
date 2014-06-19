@@ -29,3 +29,6 @@ a.text-item-rare:hover {
 a.text-item-epic:hover {
   color: #4C2982;
 }
+li.text-navbar {
+  padding: 15px;
+}

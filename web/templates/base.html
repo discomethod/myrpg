@@ -30,10 +30,18 @@
           </button>
           <span class="navbar-brand" href="#">myRPG</span>
         </div>
-        <div class="collapse navbar-collapse" id="navbar-content">
+        <div class="pull-right collapse navbar-collapse" id="navbar-content">
           <ul class="nav navbar-nav">
+            {% if user.is_authenticated %}
+            <li class="text-navbar">{{ user.username }}</li>
+            {% endif %}
             <li class="{% if header_tab == 'items' %}active{% endif %}"><a href="{% url 'itemlist' %}">All Items</a></li>
             <li class="{% if header_tab == 'affixes' %}active{% endif %}"><a href="{% url 'affixlist' %}">All Affixes</a></li>
+            {% if user.is_authenticated %}
+            <li class="{% if header_tab == 'account' %}active{% endif %}"><a href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+            <li class="{% if header_tab == 'account' %}active{% endif %}"><a href="{% url 'login' %}">Login</a></li>
+            {% endif %}
           </ul>
         </div>
       </div>
@@ -49,5 +57,13 @@
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    {% if form %}
+    <script>
+      $("form :input").addClass("form-control");
+      $(".btn").removeClass("form-control");
+    </script>
+    {% endif %}
+    {% block scripts %}
+    {% endblock %}
   </body>
 </html>

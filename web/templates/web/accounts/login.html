@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+    <p>If you don't have an account you can fuck off because I'm not making an account creation page right now.</p>
+    <p><a href="#" class="btn btn-warning">Register</a></p>
+    {% for success_message in success_messages %}
+      <div class="alert alert-success">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        {{ success_message }}
+      </div>
+    {% endfor %}
+      <form role="form" action="{% url 'login' %}" method="post" class="">{% csrf_token %}
+        {% include 'form.html' %}
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </div>
+  </div>
+{% endblock content %}
