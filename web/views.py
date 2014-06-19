@@ -2,12 +2,15 @@ from copy import copy
 from itertools import combinations
 from random import randrange
 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template import RequestContext, loader
 from django.utils.html import escape
 
+from web.forms import LoginForm
 from web.models import Item, ItemAffix, ItemAffixGroup, ItemRarePrefix, ItemRareSuffix
 from web.models import trim_net_modifiables, display_net_modifiable
 
@@ -272,3 +275,59 @@ def item(request, item_id):
                 'display_modifiables_list': display_modifiables_list,
                 }
     return render(request, 'web/item.html', context)
+
+def login_view(request):
+    # check if the form has been submitted
+    if request.method == 'POST':
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    # Redirect to a success page.
+                    return redirect('itemlist')
+                else:
+                    # Return a 'disabled account' error message
+                    context = {'header_tab': 'account',
+                                'form': form,
+                                }
+                    return render(request, 'web/accounts/login.html', context)
+            else:
+                # Return an 'invalid login' error message
+                context = {'header_tab': 'account',
+                            'form': form,
+                            }
+                return render(request, 'web/accounts/login.html', context)
+        else:
+            # Return an 'invalid form' error message
+            context = {'header_tab': 'account',
+                        'form': form,
+                        }
+            return render(request, 'web/accounts/login.html', context)
+    else:
+        # Return the login form
+        form = LoginForm()
+        context = {'header_tab': 'account',
+                    'form': form,
+                    }
+        return render(request,'web/accounts/login.html', context)
+
+def logout_view(request):
+    if request.user.is_authenticated():
+        # user is logged in, so now we log out
+        form = LoginForm()
+        success_messages = list()
+        success_message = request.user.username + ", you have successfully logged out."
+        success_messages.append(success_message)
+        context = {'header_tab': 'account',
+                    'form': form,
+                    'success_messages': success_messages,
+                    }
+        logout(request)
+        return render(request,'web/accounts/login.html', context)
+    else:
+        # user is not logged in, so we redirect to login
+        return redirect('login')
