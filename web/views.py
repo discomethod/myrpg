@@ -147,7 +147,7 @@ def itemgen(request):
                 # degenerate case if prefix and suffix are both 0
                 if prefix_num + suffix_num == 0:
                     continue
-                if prefix_num+1 < suffix_num or suffix_num+1 < prefix_num:
+                if prefix_num+CORE_AFFIX_DISCREPANCY < suffix_num or suffix_num+CORE_AFFIX_DISCREPANCY < prefix_num:
                     continue
                 # generate all possible items with prefix_num prefixes and suffix_num suffixes
                 for prefixgroup_combination in combinations(prefixgroup_list,prefix_num):
