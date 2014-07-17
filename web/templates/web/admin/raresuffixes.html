@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}
+Rare Suffixes
+{% endblock %}
+
+{% block content %}
+{% autoescape off %}
+  <div class="row">
+    <div class="col-md-6 col-md-offset-3">
+      <table class="table table-striped">
+        <tr>
+          <th>&nbsp;</th>
+          {% for item_type in item_types %}
+          <th>{{ item_type }}</th>
+          {% endfor %}
+        </tr>
+        {% for item_rare_suffix in item_rare_suffixes %}
+        <tr>
+          <td>{{ item_rare_suffix }}</td>
+          {% for item_type in item_types %}
+          <th>A</th>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endautoescape %}
+{% endblock %}
