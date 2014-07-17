@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from web import views, aviews
+from web import views
 
 urlpatterns = patterns('',
     url(r'^item/(?P<item_id>\d+)/$', views.item, name='item'),
