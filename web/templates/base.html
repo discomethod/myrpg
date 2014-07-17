@@ -35,8 +35,8 @@
             {% if user.is_authenticated %}
             <li class="text-navbar">{{ user.username }}</li>
             {% endif %}
-            <li class="{% if header_tab == 'items' %}active{% endif %}"><a href="{% url 'itemlist' %}">All Items</a></li>
-            <li class="{% if header_tab == 'affixes' %}active{% endif %}"><a href="{% url 'affixlist' %}">All Affixes</a></li>
+            <li class="{% if header_tab == 'items' %}active{% endif %}"><a href="{% url 'item_list' %}">All Items</a></li>
+            <li class="{% if header_tab == 'affixes' %}active{% endif %}"><a href="{% url 'affix_list' %}">All Affixes</a></li>
             {% if user.is_authenticated %}
             <li class="{% if header_tab == 'account' %}active{% endif %}"><a href="{% url 'logout' %}">Logout</a></li>
             {% else %}

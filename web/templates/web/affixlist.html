@@ -10,10 +10,10 @@ All Affixes
     <div class="panel panel-default">
       <div class="panel-heading"><h4>Prefix Groups</h4></div>
       <ul class="list-group">
-      {% for prefixgroup in prefixgroup_list %}
+      {% for prefix_group in prefix_group_list %}
         <li class="list-group-item">
-          <span class="badge">{{ prefixgroup.affixes }}</span>
-          <a href="{% url 'affixgroup' prefixgroup.pk %}">{{ prefixgroup }}</a>
+          <span class="badge">{{ prefix_group.affixes }}</span>
+          <a href="{% url 'affix_group' prefix_group.pk %}">{{ prefix_group }}</a>
         </li>
       {% endfor %}
       </ul>
@@ -25,10 +25,10 @@ All Affixes
     <div class="panel panel-default">
       <div class="panel-heading"><h4>Suffix Groups</h4></div>
       <ul class="list-group">
-      {% for suffixgroup in suffixgroup_list %}
+      {% for suffix_group in suffix_group_list %}
         <li class="list-group-item">
-          <span class="badge">{{ suffixgroup.affixes }}</span>
-          <a href="{% url 'affixgroup' suffixgroup.pk %}">{{ suffixgroup }}</a>
+          <span class="badge">{{ suffix_group.affixes }}</span>
+          <a href="{% url 'affix_group' suffix_group.pk %}">{{ suffix_group }}</a>
         </li>
       {% endfor %}
       </ul>

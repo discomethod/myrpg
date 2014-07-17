@@ -6,13 +6,13 @@ Generate Items
 
 {% block content %}
 {% if item_list %}
-    <form role="form" action="{% url 'itemgen' %}" method="post">
+    <form role="form" action="{% url 'item_gen' %}" method="post">
     {% csrf_token %}
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
-            <label for="baseItem">Base Item</label>
-            <select class="form-control" id="baseItem" name="baseItem">
+            <label for="base_item">Base Item</label>
+            <select class="form-control" id="base_item" name="base_item">
             {% for item in item_list %}
               <option value="{{ item.pk }}">{{ item }}</option>
             {% endfor %}

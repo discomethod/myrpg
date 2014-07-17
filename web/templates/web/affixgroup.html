@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ affixgroup }}
+{{ affix_group }}
 {% endblock %}
 
 {% block content %}
@@ -10,10 +10,10 @@
   <div class="row">
     <div class="col-md-4 col-md-offset-4">
       <div class="panel panel-default">
-        <div class="panel-heading"><h4>{% if affixgroup.prefix %}prefix{% else %}suffix{% endif %}es: {{ affixgroup }}</h4></div>
-        {% if affixgroup.description %}
+        <div class="panel-heading"><h4>{% if affix_group.prefix %}prefix{% else %}suffix{% endif %}es: {{ affix_group }}</h4></div>
+        {% if affix_group.description %}
         <div class="panel-body">
-          <em>{{ affixgroup.description }}</em>
+          <em>{{ affix_group.description }}</em>
         </div>
         {% endif %}
         <ul class="list-group">

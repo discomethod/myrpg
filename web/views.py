@@ -21,54 +21,54 @@ def index(request):
 
 def affix(request, affix_id):
     affix = get_object_or_404(ItemAffix, pk=affix_id)
-    foundon = Item.objects.filter(affixes=affix).annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
+    found_on = Item.objects.filter(affixes=affix).annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
     context = {'header_tab': 'affixes',
                'affix': affix,
-               'foundon': foundon,
+               'found_on': found_on,
                }
     return render(request, 'web/affix.html', context)
 
-def affixgroup(request, affixgroup_id):
-    affixgroup = get_object_or_404(ItemAffixGroup, pk=affixgroup_id)
-    affixes = affixgroup.itemaffix_set.order_by('-ilevel','name')
+def affix_group(request, affix_group_id):
+    affix_group = get_object_or_404(ItemAffixGroup, pk=affix_group_id)
+    affixes = affix_group.itemaffix_set.order_by('-ilevel','name')
     context = {'header_tab': 'affixes',
-               'affixgroup': affixgroup,
+               'affix_group': affix_group,
                'affixes': affixes,
                }
     return render(request, 'web/affixgroup.html', context)
 
-def affixlist(request):
-    prefixgroup_list = ItemAffixGroup.objects.filter(prefix=True).order_by('name').annotate(affixes=Count('itemaffix'))
-    suffixgroup_list = ItemAffixGroup.objects.filter(prefix=False).order_by('name').annotate(affixes=Count('itemaffix'))
+def affix_list(request):
+    prefix_group_list = ItemAffixGroup.objects.filter(prefix=True).order_by('name').annotate(affixes=Count('itemaffix'))
+    suffix_group_list = ItemAffixGroup.objects.filter(prefix=False).order_by('name').annotate(affixes=Count('itemaffix'))
     context = {'header_tab': 'affixes',
-               'prefixgroup_list': prefixgroup_list,
-               'suffixgroup_list': suffixgroup_list,
+               'prefix_group_list': prefix_group_list,
+               'suffix_group_list': suffix_group_list,
                }
     return render(request, 'web/affixlist.html', context)
 
-def itemgen(request):
+def item_gen(request):
     
-    def generate_affix_list( current_state, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible ):
+    def generate_affix_list( current_state, prefix_group_combination, suffix_group_combination, prefixes_possible, suffixes_possible ):
         # current_state is the list of the current sequence, e.g. [P1, P2, P3, S1,]
-        # affixgroup_combination is a list [AG1, AG2, AG3,]
+        # affix_group_combination is a list [AG1, AG2, AG3,]
         # affixes_possible is a list [[P1, P2, P3,], [P4, P5, P6,], [P7, P8, P9],]
-        if current_state == None:
+        if current_state is None:
             current_state = []
         # calculate how many more affixes still need to be added
-        toadd = len(prefixgroup_combination)+len(suffixgroup_combination)-len(current_state)
+        to_add = len(prefix_group_combination)+len(suffix_group_combination)-len(current_state)
         current_state_new = []
         return_masterlist = []
         return_sublist = []
         
         # check if we're on the last level of recursion
         # this occurs when only one last affix needs to be added
-        if toadd == 1:
+        if to_add == 1:
             # exit case
             # determine if we should add prefix or suffix
-            if len(current_state) >= len(prefixgroup_combination):
+            if len(current_state) >= len(prefix_group_combination):
                 # all prefixes have been added
                 # we need to add a suffix
-                for suffix_possible in suffixes_possible[len(current_state)-len(prefixgroup_combination)]:
+                for suffix_possible in suffixes_possible[len(current_state)-len(prefix_group_combination)]:
                     return_sublist = current_state[:]
                     return_sublist.append(suffix_possible.pk)
                     return_masterlist.append(return_sublist)
@@ -82,23 +82,23 @@ def itemgen(request):
             return return_masterlist
         else:
             # there is more than one affix that still needs to be added
-            if len(current_state) < len(prefixgroup_combination):
+            if len(current_state) < len(prefix_group_combination):
                 # we still need to add prefixes
                 for prefix_possible in prefixes_possible[len(current_state)]:
                     current_state_new = current_state[:]
                     current_state_new.append(prefix_possible.pk)
-                    return_masterlist += generate_affix_list( current_state_new, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible)
+                    return_masterlist += generate_affix_list( current_state_new, prefix_group_combination, suffix_group_combination, prefixes_possible, suffixes_possible)
                 return return_masterlist
             else:
                 # we still need to add suffixes
-                for suffix_possible in suffixes_possible[len(current_state)-len(prefixgroup_combination)]:
+                for suffix_possible in suffixes_possible[len(current_state)-len(prefix_group_combination)]:
                     current_state_new = current_state[:]
                     current_state_new.append(suffix_possible.pk)
-                    return_masterlist += generate_affix_list( current_state_new, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible)
+                    return_masterlist += generate_affix_list( current_state_new, prefix_group_combination, suffix_group_combination, prefixes_possible, suffixes_possible)
                 return return_masterlist
     
     try:
-        base_item = Item.objects.get(pk=request.POST['baseItem'])
+        base_item = Item.objects.get(pk=request.POST['base_item'])
     except (KeyError, Item.DoesNotExist) as e:
         # KeyError => base item was not provided
         # Item.DoesNotExist => base item id was not found
@@ -119,29 +119,29 @@ def itemgen(request):
         CORE_AFFIX_DISCREPANCY = 1 # maximum difference between number of fixes
         # we now have a base item to work with
         # get all the possible prefixes
-        prefixgroup_post_list = request.POST.getlist('prefixgroup')
-        suffixgroup_post_list = request.POST.getlist('suffixgroup')
-        prefixgroup_list = list()
-        suffixgroup_list = list()
+        prefix_group_post_list = request.POST.getlist('prefixgroup')
+        suffix_group_post_list = request.POST.getlist('suffixgroup')
+        prefix_group_list = list()
+        suffix_group_list = list()
         # convert POST data to objects
-        for prefixgroup_post in prefixgroup_post_list:
-            prefixgroup_list.append(ItemAffixGroup.objects.get(pk=prefixgroup_post))
-        for suffixgroup_post in suffixgroup_post_list:
-            suffixgroup_list.append(ItemAffixGroup.objects.get(pk=suffixgroup_post))
-        # sort affixgroup lists by the id of the affixgroup
-        prefixgroup_list.sort(key = lambda x: x.pk)
-        suffixgroup_list.sort(key = lambda x: x.pk)
+        for prefix_group_post in prefix_group_post_list:
+            prefix_group_list.append(ItemAffixGroup.objects.get(pk=prefix_group_post))
+        for suffix_group_post in suffix_group_post_list:
+            suffix_group_list.append(ItemAffixGroup.objects.get(pk=suffix_group_post))
+        # sort affix_group lists by the id of the affix_group
+        prefix_group_list.sort(key = lambda x: x.pk)
+        suffix_group_list.sort(key = lambda x: x.pk)
         # get all the data for the affixgroups
         prefixes_possible_bygroup = dict()
         suffixes_possible_bygroup = dict()
-        for prefixgroup in prefixgroup_list:
-            prefixes_possible_bygroup[prefixgroup.pk] = ItemAffix.objects.filter(group=prefixgroup).filter(ilevel__lte=base_item.ilevel).order_by('-ilevel')[:CORE_FIXES_FROM_AFFIXGROUP]
-        for suffixgroup in suffixgroup_list:
-            suffixes_possible_bygroup[suffixgroup.pk] = ItemAffix.objects.filter(group=suffixgroup).filter(ilevel__lte=base_item.ilevel).order_by('-ilevel')[:CORE_FIXES_FROM_AFFIXGROUP]
+        for prefix_group in prefix_group_list:
+            prefixes_possible_bygroup[prefix_group.pk] = ItemAffix.objects.filter(group=prefix_group).filter(ilevel__lte=base_item.ilevel).order_by('-ilevel')[:CORE_FIXES_FROM_AFFIXGROUP]
+        for suffix_group in suffix_group_list:
+            suffixes_possible_bygroup[suffix_group.pk] = ItemAffix.objects.filter(group=suffix_group).filter(ilevel__lte=base_item.ilevel).order_by('-ilevel')[:CORE_FIXES_FROM_AFFIXGROUP]
         # max CORE_PREFIX_MAX prefixes, less if there aren't enough to choose from, and no more than CORE_AFFIX_DISCREPANCY more than the number of suffixes
-        prefix_max = min(CORE_PREFIX_MAX,len(prefixgroup_list),len(suffixgroup_list)+CORE_AFFIX_DISCREPANCY)
+        prefix_max = min(CORE_PREFIX_MAX,len(prefix_group_list),len(suffix_group_list)+CORE_AFFIX_DISCREPANCY)
         # max CORE_SUFFIX_MAX suffixes, less if there aren't enough to choose from, and no more than CORE_AFFIX_DISCREPANCY more than the number of prefixes
-        suffix_max = min(CORE_SUFFIX_MAX,len(suffixgroup_list),len(prefixgroup_list)+CORE_AFFIX_DISCREPANCY)
+        suffix_max = min(CORE_SUFFIX_MAX,len(suffix_group_list),len(prefix_group_list)+CORE_AFFIX_DISCREPANCY)
         for prefix_num in range(prefix_max+1): # number of prefixes from 0 to prefix_max INCLUSIVE
             for suffix_num in range(suffix_max+1):# number of suffixes from 0 to prefix_max INCLUSIVE
                 # degenerate case if prefix and suffix are both 0
@@ -150,27 +150,27 @@ def itemgen(request):
                 if prefix_num+CORE_AFFIX_DISCREPANCY < suffix_num or suffix_num+CORE_AFFIX_DISCREPANCY < prefix_num:
                     continue
                 # generate all possible items with prefix_num prefixes and suffix_num suffixes
-                for prefixgroup_combination in combinations(prefixgroup_list,prefix_num):
-                    for suffixgroup_combination in combinations(suffixgroup_list,suffix_num):
-                        # affixgroup_combination is a list of the primary keys of the affixgroups we are going to add
+                for prefix_group_combination in combinations(prefix_group_list,prefix_num):
+                    for suffix_group_combination in combinations(suffix_group_list,suffix_num):
+                        # affix_group_combination is a list of the primary keys of the affix_groups we are going to add
                         # e.g., [AG1,AG3,AG7,] or [AG1, AG3,] (i.e., no padding)
-                        # if the affixgroup list is empty, or affixgroup_num is 0, we get an empty list []
+                        # if the affix_group list is empty, or affix_group_num is 0, we get an empty list []
                         prefixes_possible = [[None,] for ii in range(CORE_PREFIX_MAX)]
                         suffixes_possible = [[None,] for ii in range(CORE_SUFFIX_MAX)]
-                        for pindex, prefixgroup in enumerate(prefixgroup_combination):
-                            prefixes_possible[pindex] = prefixes_possible_bygroup[prefixgroup.pk]
-                        for sindex, suffixgroup in enumerate(suffixgroup_combination):
-                            suffixes_possible[sindex] = suffixes_possible_bygroup[suffixgroup.pk]
+                        for pindex, prefix_group in enumerate(prefix_group_combination):
+                            prefixes_possible[pindex] = prefixes_possible_bygroup[prefix_group.pk]
+                        for sindex, suffix_group in enumerate(suffix_group_combination):
+                            suffixes_possible[sindex] = suffixes_possible_bygroup[suffix_group.pk]
                         current_state = []
-                        affixes_list = generate_affix_list( current_state, prefixgroup_combination, suffixgroup_combination, prefixes_possible, suffixes_possible )
+                        affixes_list = generate_affix_list( current_state, prefix_group_combination, suffix_group_combination, prefixes_possible, suffixes_possible )
                         if len(affixes_list) == 0:
-                            # this will sometimes occure if the only affix group has no affixes with low enough ilevel
+                            # this will sometimes occur if the only affix group has no affixes with low enough ilevel
                             continue   
                         for affix_list in affixes_list:
                             # affix_list is a list containing [P1, P3, P8, S1, S3,], etc.
                             # split it into a prefix_list and an suffix_list
-                            prefix_list_pks = affix_list[:len(prefixgroup_combination)]
-                            suffix_list_pks = affix_list[len(prefixgroup_combination):]
+                            prefix_list_pks = affix_list[:len(prefix_group_combination)]
+                            suffix_list_pks = affix_list[len(prefix_group_combination):]
                             prefix_list = []
                             suffix_list = []
                             # convert from PKs back into affix objects
@@ -179,7 +179,7 @@ def itemgen(request):
                             for suffix_pk in suffix_list_pks:
                                 suffix_list.append(ItemAffix.objects.get(pk=suffix_pk))
                             # check if the item we are about to create already exists
-                            affix_total = len(prefixgroup_combination)+len(suffixgroup_combination)
+                            affix_total = len(prefix_group_combination)+len(suffix_group_combination)
                             temp = Item.objects.filter(base=base_item).annotate(num_affixes=Count('affixes')).filter(num_affixes=affix_total)
                             for affix in affix_list:
                                 temp = temp.filter(affixes=affix)
@@ -205,6 +205,7 @@ def itemgen(request):
                             for affix in affix_list:
                                 new_item.affixes.add(affix)
                             # generate the new item's rarity
+                            # the only criteria for a rare item is having more than one suffix
                             if len(suffix_list) > 1:
                                 new_item.rarity = "RARE"
                             else:
@@ -222,10 +223,10 @@ def itemgen(request):
                                 # rare name
                                 temp_name = base_item.name
                                 while len(Item.objects.filter(name=temp_name)) > 0:
-                                    RARE_PREFIXES = ItemRarePrefix.objects.all()
-                                    RARE_SUFFIXES = new_item.itype.raresuffixes.all()
-                                    rare_prefix = str(RARE_PREFIXES[randrange(len(RARE_PREFIXES))])
-                                    rare_suffix = str(RARE_SUFFIXES[randrange(len(RARE_SUFFIXES))])
+                                    rare_prefixes = ItemRarePrefix.objects.all()
+                                    rare_suffixes = new_item.itype.raresuffixes.all()
+                                    rare_prefix = str(rare_prefixes[randrange(len(rare_prefixes))])
+                                    rare_suffix = str(rare_suffixes[randrange(len(rare_suffixes))])
                                     temp_name = rare_prefix + " " + rare_suffix + ", " + base_item.name.title()
                                 new_item.name = temp_name
                             # save this new item
@@ -241,7 +242,7 @@ def itemgen(request):
                    }
         return render(request, 'web/itemgen.html', context)
 
-def itemlist(request):
+def item_list(request):
     raw_item_list = Item.objects.annotate(affix_sum=Sum('affixes__ilevel')).order_by('itype__name','-base__ilevel','base__name','-affix_sum','name')
     item_list = list()
     current_sublist = list()
@@ -267,7 +268,7 @@ def item(request, item_id):
     display_modifiables_list = list() # list of strings to display
     for item_net_modifiable in item_net_modifiables:
         display_modifiables_list += display_net_modifiable(item_net_modifiable)
-    if (not item.description) and item.base and item.base.description:
+    if not item.description and item.base and item.base.description:
         # if this item is a generated item with no description, use the description of the base item
         item.description = item.base.description + " There's something different about this " + str(item.base) + " though."
     context = {'header_tab': 'items',
@@ -288,7 +289,7 @@ def login_view(request):
                 if user.is_active:
                     login(request, user)
                     # Redirect to a success page.
-                    return redirect('itemlist')
+                    return redirect('item_list')
                 else:
                     # Return a 'disabled account' error message
                     context = {'header_tab': 'account',
