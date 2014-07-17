@@ -116,7 +116,7 @@ def itemgen(request):
         CORE_PREFIX_MAX = 2 # absolute maximum number of prefixes
         CORE_SUFFIX_MAX = 2 # absolute maximum number of suffixes
         CORE_FIXES_FROM_AFFIXGROUP = 3 # how many of the top affixes to pick from each fixgroup
-        CORE_AFFIX_DISCREPANCY = 1 # maxmimum difference between number of fixes
+        CORE_AFFIX_DISCREPANCY = 1 # maximum difference between number of fixes
         # we now have a base item to work with
         # get all the possible prefixes
         prefixgroup_post_list = request.POST.getlist('prefixgroup')
