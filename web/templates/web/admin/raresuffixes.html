@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{%  load web_extras %}
+
 {% block title %}
 Rare Suffixes
 {% endblock %}
@@ -15,11 +17,11 @@ Rare Suffixes
           <th>{{ item_type }}</th>
           {% endfor %}
         </tr>
-        {% for item_rare_suffix in item_rare_suffixes %}
+        {% for item_rare_suffix_index in item_rare_suffixes_len|range_ %}
         <tr>
-          <td>{{ item_rare_suffix }}</td>
-          {% for item_type in item_types %}
-          <th>A</th>
+          <td>{{ item_rare_suffixes.item_rare_suffix_index }}</td>
+          {% for item_type_index in item_types_len|range_ %}
+          <th>{{ item_rare_suffix_index }}, {{ item_type_index }}</th>
           {% endfor %}
         </tr>
         {% endfor %}

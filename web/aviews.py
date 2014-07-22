@@ -28,6 +28,8 @@ def rare_suffixes(request):
                 item_matrix[sindex][tindex] = True
     context = {'header_tab': 'admin',
                 'item_types': item_types,
+                'item_types_len': len(item_types),
                 'item_rare_suffixes': item_rare_suffixes,
+                'item_rare_suffixes_len': len(item_rare_suffixes),
                 'item_matrix': item_matrix,}
     return render(request,'web/admin/raresuffixes.html', context)
