@@ -88,14 +88,13 @@ def item_gen(request):
                     current_state_new = current_state[:]
                     current_state_new.append(prefix_possible.pk)
                     return_masterlist += generate_affix_list( current_state_new, prefix_group_combination, suffix_group_combination, prefixes_possible, suffixes_possible)
-                return return_masterlist
             else:
                 # we still need to add suffixes
                 for suffix_possible in suffixes_possible[len(current_state)-len(prefix_group_combination)]:
                     current_state_new = current_state[:]
                     current_state_new.append(suffix_possible.pk)
                     return_masterlist += generate_affix_list( current_state_new, prefix_group_combination, suffix_group_combination, prefixes_possible, suffixes_possible)
-                return return_masterlist
+            return return_masterlist
     
     try:
         base_item = Item.objects.get(pk=request.POST['base_item'])
@@ -222,9 +221,9 @@ def item_gen(request):
                             else:
                                 # rare name
                                 temp_name = base_item.name
+                                rare_prefixes = ItemRarePrefix.objects.all()
+                                rare_suffixes = new_item.itype.raresuffixes.all()
                                 while len(Item.objects.filter(name=temp_name)) > 0:
-                                    rare_prefixes = ItemRarePrefix.objects.all()
-                                    rare_suffixes = new_item.itype.raresuffixes.all()
                                     rare_prefix = str(rare_prefixes[randrange(len(rare_prefixes))])
                                     rare_suffix = str(rare_suffixes[randrange(len(rare_suffixes))])
                                     temp_name = rare_prefix + " " + rare_suffix + ", " + base_item.name.title()
