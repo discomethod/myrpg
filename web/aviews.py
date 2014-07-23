@@ -24,7 +24,7 @@ def rare_suffixes(request):
     item_matrix = [[False for x in range(len(item_types))] for x in range(len(item_rare_suffixes))]
     for sindex, item_rare_suffix in enumerate(item_rare_suffixes):
         for tindex, item_type in enumerate(item_types):
-            if item_type.raresuffixes.filter(pk=item_rare_suffix.pk):
+            if item_type.raresuffixes.filter(pk=item_rare_suffix.pk).exists():
                 item_matrix[sindex][tindex] = True
     context = {'header_tab': 'admin',
                 'item_types': item_types,

@@ -4,7 +4,7 @@ register = Library()
 
 @register.filter
 def range_(value):
-  """
+    """
     Filter - returns a list containing range made from given value
     Usage (in template):
 
@@ -20,5 +20,13 @@ def range_(value):
     </ul>
 
     Instead of 3 one may use the variable set in the views
-  """
-  return range(value)
+    """
+    return range(value)
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+@register.filter
+def get_list_item(list, index):
+    return list[index]

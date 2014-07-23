@@ -17,11 +17,16 @@ Rare Suffixes
           <th>{{ item_type }}</th>
           {% endfor %}
         </tr>
-        {% for item_rare_suffix_index in item_rare_suffixes_len|range_ %}
+        {% for item_matrix_sublist in item_matrix %}
         <tr>
-          <td>{{ item_rare_suffixes.item_rare_suffix_index }}</td>
-          {% for item_type_index in item_types_len|range_ %}
-          <th>{{ item_rare_suffix_index }}, {{ item_type_index }}</th>
+          <td>{{ item_rare_suffixes|get_list_item:forloop.counter0 }}</td>
+          {% for item_suffix in item_matrix_sublist %}
+          <td>
+              {% if item_suffix %}
+              <strong class="text-success">{{ forloop.parentloop.counter0 }}, {{ forloop.counter0 }}</strong>
+              {%  else %}
+              <span class="text-muted">NO</span>{% endif %}
+          </td>
           {% endfor %}
         </tr>
         {% endfor %}
