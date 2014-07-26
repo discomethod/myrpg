@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 # --- ENGINE MODELS --- #
@@ -55,7 +56,7 @@ class Modifier(models.Model):
             if self.percentage > 0:
                 description += " increased"
             else:
-                discription += " decreased"
+                description += " decreased"
             description += " " + ("local" if self.local else "global")
         description += " " + str(self.modifies).lower()
         if self.modifies:
@@ -86,7 +87,7 @@ class Modifier(models.Model):
 def get_modifiable_name(modifiable, combat_type=None):
     """Returns the standardized dictionary lookup for modifiables.
 
-    Examples: ice_defensive, mana-regeneration_offensive, momentum-regneration
+    Examples: ice_defensive, mana-regeneration_offensive, momentum-regeneration
     Affects how display_net_modifiable reverse parses the modifiable name.
     """
     return_string = str(modifiable).replace(" ","-").lower()
@@ -199,7 +200,7 @@ def display_net_modifiable(net_modifiable):
         if net_modifiable["percentage"] > 0:
             description += " increased"
         else:
-            discription += " decreased"
+            description += " decreased"
         description += " global" # all local mods are already baked into the flat values
         description += " " + str(modifiable).lower()
         if modifiable.type=="DAMAG":
@@ -222,7 +223,7 @@ def display_net_modifiable(net_modifiable):
 class CharacterClass(models.Model):
     name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
-    base = models.ForeignKey('self', blank=True, null=True)
+    tier = models.IntegerField(default=1)
     modifications = models.ManyToManyField(Modifier, blank=True) # a class can have no modifications
     def __unicode__(self):
         return self.name
@@ -240,18 +241,24 @@ class CharacterRace(models.Model):
         verbose_name = "character race"
 
 class Character(models.Model):
-    # character name
-    name = models.CharField(max_length=64)
-    # character level
+    name = models.CharField(max_length=64,unique=True)
+    user = models.ForeignKey(User)
     level = models.IntegerField(default=1)
-    # character experience
     experience = models.IntegerField(default=0)
-    # character class
     character_class = models.ForeignKey(CharacterClass, blank=True, null=True)
-    # character race
     character_race = models.ForeignKey(CharacterRace, blank=True, null=True)
     
     modifications = models.ManyToManyField(Modifier)
+    def call_get_net_modifiables(self):
+        # makes a call to get_net_modifiables with appropriate parameters for this character scope
+        modifiers_to_pass = list()
+        for modification in self.modifications.all():
+            modifiers_to_pass.append(modification)
+        return get_net_modifiables(modifiers_to_pass)
+    def calculate_stats(self):
+        # call appropriate call_get_net_modifiables methods
+        # return one final modifiables list with all relevant data
+        pass
 
 """
 SLOTS:
