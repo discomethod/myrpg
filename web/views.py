@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template import RequestContext, loader
 from django.utils.html import escape
 
-from web.forms import LoginForm
+from web.forms import LoginForm, CharacterCreateForm
 from web.models import Item, ItemAffix, ItemAffixGroup, ItemRarePrefix, ItemRareSuffix
 from web.models import trim_net_modifiables, display_net_modifiable
 
@@ -276,6 +276,19 @@ def item(request, item_id):
                 }
     return render(request, 'web/item.html', context)
 
+def character_create(request):
+    # check if the form has been submitted
+    if request.method == 'POST':
+        # do stuff related to the form
+        pass
+    else:
+        # no form was submitted
+        form = CharacterCreateForm()
+        context = {'header_tab': 'character',
+                    'form': form,
+                    }
+        return render(request,'web/characters/create.html', context)
+
 def login_view(request):
     # check if the form has been submitted
     if request.method == 'POST':
@@ -309,6 +322,7 @@ def login_view(request):
             return render(request, 'web/accounts/login.html', context)
     else:
         # Return the login form
+        character_class = CharacterClass.objects.all()
         form = LoginForm()
         context = {'header_tab': 'account',
                     'form': form,
